@@ -1,0 +1,41 @@
+{
+    "compilerOptions": {
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "allowJs": false,
+        "allowSyntheticDefaultImports": false,
+        "alwaysStrict": true,
+        "experimentalDecorators": false,
+        "forceConsistentCasingInFileNames": true,
+        "inlineSourceMap": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noEmitOnError": false,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "preserveConstEnums": false,
+        "pretty": true,
+        "outDir": "../dist",
+        "rootDir": ".",
+        "sourceRoot": ".",
+        "strictNullChecks": true,
+        "suppressExcessPropertyErrors": false,
+        "target": "es2015",
+        "typeRoots": [
+            "../@types"
+        ],
+        "watch": true
+    },
+    "exclude": [
+        "../dist",
+        "../coverage",
+        "../node_modules",
+        "../.vscode",
+        "../tests",
+        "../@types"
+    ]
+}
