@@ -1,0 +1,23 @@
+{
+    "name": "eventstore",
+    "version": "0.0.0",
+    "description": "Event Store client",
+    "main": "dist/index.js",
+    "author": "Chris McLeod <chris@warebots.com>",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/faker": "^4.1.0",
+        "@types/lodash": "^4.14.63",
+        "@types/long": "^3.0.31",
+        "@types/node": "^7.0.13",
+        "@types/uuid": "^2.0.29",
+        "faker": "^4.1.0",
+        "lodash": "^4.17.4",
+        "long": "^3.2.0",
+        "protobufjs": "~6.7.3",
+        "rxjs": "^5.3.0",
+        "string-length": "^1.0.1",
+        "uuid": "^3.0.1",
+        "uuid-parse": "^1.0.0"
+    }
+}

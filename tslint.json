@@ -1,0 +1,45 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "curly": false,
+        "max-classes-per-file": [
+            false
+        ],
+        "max-line-length": [
+            true,
+            300
+        ],
+        "variable-name": [
+            true,
+            "allow-pascal-case",
+            "allow-leading-underscore"
+        ],
+        "no-console": [
+            false
+        ],
+        "no-empty-interface": false,
+        "ordered-imports": [
+            false
+        ],
+        "interface-name": [
+            true,
+            "never-prefix"
+        ],
+        "array-type": [
+            true,
+            "generic"
+        ],
+        "trailing-comma": [
+            true,
+            {
+                "multiline": "never",
+                "singleline": "never"
+            }
+        ]
+    },
+    "rulesDirectory": []
+}
