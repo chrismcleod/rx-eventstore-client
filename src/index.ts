@@ -3,6 +3,7 @@ import "long";
 import * as faker from "faker";
 
 import { Connection } from "./connection/connection";
+import { ExpectedVersion } from "./event";
 import { Position } from "./command/command";
 import { parse } from "uuid-parse";
 import { v4 } from "uuid";
@@ -16,10 +17,10 @@ declare global {
   }
 }
 
-// const data = [];
-// for (let i = 0; i < 500; ++i) {
-//   data.push(faker.helpers.userCard());
-// }
+const data = [];
+for (let i = 0; i < 500; ++i) {
+  data.push(faker.helpers.userCard());
+}
 
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 
@@ -33,10 +34,10 @@ const connection = new Connection({ host: "192.168.99.100", credentials: { usern
 // }));
 
 // process.nextTick(async () => {
-//   for (let event of events) {
-//     const result = await connection.writeEvents({
+//   for (const event of eventData) {
+//     await connection.writeEvents({
 //       eventStreamId: `user-${v4()}`,
-//       events: [event],
+//       events: [ event ],
 //       expectedVersion: ExpectedVersion.Any,
 //       requireMaster: false
 //     });
@@ -48,9 +49,9 @@ process.nextTick(async () => {
   let events: Array<any> = [];
   let pos = 0;
   while (len >= 100) {
-    const result = await connection.readStreamEventsForward({
-      eventStreamId: "user-4562b02d-33f2-40c2-9074-23b9e1cc99bd",
-      fromEventNumber: 0,
+    const result = await connection.readStreamEventsBackward({
+      eventStreamId: "$ce-user",
+      fromEventNumber: 10,
       maxCount: 100,
       requireMaster: false,
       resolveLinkTos: true
@@ -58,6 +59,6 @@ process.nextTick(async () => {
     if (result.message && result.message.events) events = events.concat(result.message.events);
     len = result.message.events.length;
     pos += 100;
-    console.log(result.message.events[0].event.data.toString("utf8"));
+    console.log(result.message.events[0]);
   }
 });
