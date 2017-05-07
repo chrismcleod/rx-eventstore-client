@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 
-import { ReadAllEventsBackward, ReadAllEventsForward, WriteEvents, getCommand } from "../command";
+import { ReadAllEventsBackward, ReadAllEventsForward, ReadStreamEventsForward, WriteEvents, getCommand } from "../command";
 import { Socket, connect } from "net";
 
 import { Credentials } from "../authentication";
@@ -55,6 +55,11 @@ export class Connection {
 
   public async readAllEventsForward(params: ReadAllEventsForward.Params) {
     const command = getCommand(ReadAllEventsForward.CODE, params);
+    return this._dispatcher.dispatch(command);
+  }
+
+  public async readStreamEventsForward(params: ReadStreamEventsForward.Params) {
+    const command = getCommand(ReadStreamEventsForward.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 
