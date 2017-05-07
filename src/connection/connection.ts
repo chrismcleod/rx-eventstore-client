@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 
-import { ReadAllEventsBackward, ReadAllEventsForward, ReadStreamEventsForward, WriteEvents, getCommand } from "../command";
+import { ReadAllEventsBackward, ReadAllEventsForward, ReadStreamEventsBackward, ReadStreamEventsForward, WriteEvents, getCommand } from "../command";
 import { Socket, connect } from "net";
 
 import { Credentials } from "../authentication";
@@ -35,12 +35,9 @@ export class Connection {
     options = options || {};
     options = _.merge({}, Connection._defaultOptions, options);
     this._options = options;
-    this._connect();
-    this._$ = new EventStoreSocketStream(this._socket);
-    this._dispatcher = new TCPDispatcher(this._socket, options.credentials);
     this._handleIncomingCommand = this._handleIncomingCommand.bind(this);
     this._currentReconnectionAttempts = 0;
-    this._initialize();
+    this._connect();
   }
 
   public async writeEvents(params: WriteEvents.Params) {
@@ -63,8 +60,9 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
-  private _initialize() {
-    this._$.command$.subscribe(this._handleIncomingCommand);
+  public async readStreamEventsBackward(params: ReadStreamEventsBackward.Params) {
+    const command = getCommand(ReadStreamEventsBackward.CODE, params);
+    return this._dispatcher.dispatch(command);
   }
 
   private _handleIncomingCommand(command: any) {
@@ -75,8 +73,11 @@ export class Connection {
     this._currentReconnectionAttempts += 1;
     if (this._socket) this._socket.removeAllListeners();
     this._socket = connect(this._options.port!, this._options.host);
+    this._$ = new EventStoreSocketStream(this._socket);
+    this._dispatcher = new TCPDispatcher(this._socket, this._options.credentials);
+    this._$.command$.subscribe(this._handleIncomingCommand);
     this._socket.on("connect", () => {
-      console.log(`Connected after ${this._currentReconnectionAttempts} attempts`);
+      console.log(`Connected after ${this._currentReconnectionAttempts} attempt${this._currentReconnectionAttempts > 1 ? "s" : ""}`);
       this._currentReconnectionAttempts = 0;
     });
     this._socket.on("close", (error) => {
