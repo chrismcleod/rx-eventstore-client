@@ -6,6 +6,8 @@ import * as ReadAllEventsForward from "./read-all-events-forward";
 import * as ReadAllEventsForwardCompleted from "./read-all-events-forward-completed";
 import * as ReadStreamEventsBackward from "./read-stream-events-backward";
 import * as ReadStreamEventsBackwardCompleted from "./read-stream-events-backward-completed";
+import * as ReadStreamEventsForward from "./read-stream-events-forward";
+import * as ReadStreamEventsForwardCompleted from "./read-stream-events-forward-completed";
 import * as WriteEvents from "./write-events";
 import * as WriteEventsCompleted from "./write-events-completed";
 
@@ -21,6 +23,8 @@ export {
   ReadAllEventsForwardCompleted,
   ReadStreamEventsBackward,
   ReadStreamEventsBackwardCompleted,
+  ReadStreamEventsForward,
+  ReadStreamEventsForwardCompleted,
   WriteEvents,
   WriteEventsCompleted
 };
@@ -39,6 +43,8 @@ export const CodeToNamespace = {
   [ReadAllEventsBackwardCompleted.CODE]: ReadAllEventsBackwardCompleted,
   [ReadStreamEventsBackward.CODE]: ReadStreamEventsBackward,
   [ReadStreamEventsBackwardCompleted.CODE]: ReadStreamEventsBackwardCompleted,
+  [ReadStreamEventsForward.CODE]: ReadStreamEventsForward,
+  [ReadStreamEventsForwardCompleted.CODE]: ReadStreamEventsForwardCompleted,
   [WriteEvents.CODE]: WriteEvents,
   [WriteEventsCompleted.CODE]: WriteEventsCompleted
 };
@@ -75,6 +81,8 @@ export function getCommand(id: ReadAllEventsForward.CODE, params: Buffer | ReadA
 export function getCommand(id: ReadAllEventsForwardCompleted.CODE, params: Buffer | ReadAllEventsForwardCompleted.Params, correlationId?: string): ReadAllEventsForwardCompleted.Command;
 export function getCommand(id: ReadStreamEventsBackward.CODE, params: Buffer | ReadStreamEventsBackward.Params, correlationId?: string): ReadStreamEventsBackward.Command;
 export function getCommand(id: ReadStreamEventsBackwardCompleted.CODE, params: Buffer | ReadStreamEventsBackwardCompleted.Params, correlationId?: string): ReadStreamEventsBackwardCompleted.Command;
+export function getCommand(id: ReadStreamEventsForward.CODE, params: Buffer | ReadStreamEventsForward.Params, correlationId?: string): ReadStreamEventsForward.Command;
+export function getCommand(id: ReadStreamEventsForwardCompleted.CODE, params: Buffer | ReadStreamEventsForwardCompleted.Params, correlationId?: string): ReadStreamEventsForwardCompleted.Command;
 export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
 export function getCommand(id: number, params?: any, correlationId?: string) {
   const CommandNamespace = CodeToNamespace[id];
