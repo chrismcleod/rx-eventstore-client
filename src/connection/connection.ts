@@ -1,6 +1,7 @@
+import * as Commands from "../command";
+import * as Rx from "rxjs";
 import * as _ from "lodash";
 
-import { ReadAllEventsBackward, ReadAllEventsForward, ReadStreamEventsBackward, ReadStreamEventsForward, WriteEvents, getCommand } from "../command";
 import { Socket, connect } from "net";
 
 import { Credentials } from "../authentication";
@@ -30,39 +31,63 @@ export class Connection {
   private _$: EventStoreSocketStream;
   private _currentReconnectionAttempts: number;
   private _options: Options;
+  private _subscriptions: { [key: string]: Rx.Observable<Commands.StreamEventAppeared.Command> };
+  private _existingStreams: { [key: string]: Commands.SubscriptionConfirmation.Command };
 
   constructor(options?: Options) {
     options = options || {};
     options = _.merge({}, Connection._defaultOptions, options);
     this._options = options;
+    this._subscriptions = {};
+    this._existingStreams = {};
     this._handleIncomingCommand = this._handleIncomingCommand.bind(this);
     this._currentReconnectionAttempts = 0;
     this._connect();
   }
 
-  public async writeEvents(params: WriteEvents.Params) {
-    const command = getCommand(WriteEvents.CODE, params);
+  public async writeEvents(params: Commands.WriteEvents.Params) {
+    const command = Commands.getCommand(Commands.WriteEvents.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 
-  public async readAllEventsBackward(params: ReadAllEventsBackward.Params) {
-    const command = getCommand(ReadAllEventsBackward.CODE, params);
+  public async readAllEventsBackward(params: Commands.ReadAllEventsBackward.Params) {
+    const command = Commands.getCommand(Commands.ReadAllEventsBackward.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 
-  public async readAllEventsForward(params: ReadAllEventsForward.Params) {
-    const command = getCommand(ReadAllEventsForward.CODE, params);
+  public async readAllEventsForward(params: Commands.ReadAllEventsForward.Params) {
+    const command = Commands.getCommand(Commands.ReadAllEventsForward.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 
-  public async readStreamEventsForward(params: ReadStreamEventsForward.Params) {
-    const command = getCommand(ReadStreamEventsForward.CODE, params);
+  public async readStreamEventsForward(params: Commands.ReadStreamEventsForward.Params) {
+    const command = Commands.getCommand(Commands.ReadStreamEventsForward.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 
-  public async readStreamEventsBackward(params: ReadStreamEventsBackward.Params) {
-    const command = getCommand(ReadStreamEventsBackward.CODE, params);
+  public async readStreamEventsBackward(params: Commands.ReadStreamEventsBackward.Params) {
+    const command = Commands.getCommand(Commands.ReadStreamEventsBackward.CODE, params);
     return this._dispatcher.dispatch(command);
+  }
+
+  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Commands.StreamEventAppeared.Observer) {
+    const existingSubscriptionConfirmation = this._existingStreams[params.eventStreamId];
+    if (existingSubscriptionConfirmation) {
+      if (observer) this.addSubscriptionObserver(existingSubscriptionConfirmation.key, observer);
+      return existingSubscriptionConfirmation;
+    }
+    const command = Commands.getCommand(Commands.SubscribeToStream.CODE, params);
+    const result = await this._dispatcher.dispatch(command);
+    if (result.id === Commands.SubscriptionConfirmation.CODE) {
+      this._existingStreams[params.eventStreamId] = result;
+      const stream = this._createSubscriptionStreamFromConfirmation(result);
+      if (observer) stream.subscribe(observer);
+    }
+    return result;
+  }
+
+  public async addSubscriptionObserver(subscriptionId: string, observer: Commands.StreamEventAppeared.Observer) {
+    this._subscriptions[subscriptionId].subscribe(observer);
   }
 
   private _handleIncomingCommand(command: any) {
@@ -75,7 +100,8 @@ export class Connection {
     this._socket = connect(this._options.port!, this._options.host);
     this._$ = new EventStoreSocketStream(this._socket);
     this._dispatcher = new TCPDispatcher(this._socket, this._options.credentials);
-    this._$.command$.subscribe(this._handleIncomingCommand);
+    this._$.command$.subscribe(this._handleIncomingCommand, console.log, console.log);
+    this._$.error$.subscribe(console.log);
     this._socket.on("connect", () => {
       console.log(`Connected after ${this._currentReconnectionAttempts} attempt${this._currentReconnectionAttempts > 1 ? "s" : ""}`);
       this._currentReconnectionAttempts = 0;
@@ -87,6 +113,13 @@ export class Connection {
     this._socket.on("error", (error) => {
       console.log(error);
     });
+  }
+
+  private _createSubscriptionStreamFromConfirmation(confirmationCommand: Commands.SubscriptionConfirmation.Command) {
+    this._subscriptions[confirmationCommand.key] = this._$.command$.filter((command) => {
+      return command.id === Commands.StreamEventAppeared.CODE && command.correlationId === confirmationCommand.correlationId;
+    }).share();
+    return this._subscriptions[confirmationCommand.key];
   }
 
 }
