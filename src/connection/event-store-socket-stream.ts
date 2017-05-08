@@ -13,13 +13,15 @@ export class EventStoreSocketStream {
   private _command$: Rx.Observable<Command<number>>;
   private _extra$: Rx.Subject<Buffer>;
   private _error$: Rx.Subject<Buffer>;
+  private _util$: Rx.Subject<Command>;
 
   constructor(socket: Socket) {
     this._socket = socket;
     this._respondToHeartbeat = this._respondToHeartbeat.bind(this);
     this._extra$ = new Rx.Subject<Buffer | null>();
     this._error$ = new Rx.Subject<Buffer | null>();
-    [this._data$, this._heartbeat$] = Rx.Observable
+    this._util$ = new Rx.Subject<Command | null>();
+    [ this._data$, this._heartbeat$ ] = Rx.Observable
       .merge(Rx.Observable.fromEvent<Buffer>(this._socket, "data").share(), this._extra$.share())
       .partition((buffer) => {
         const code = buffer.readUInt8(4);
@@ -42,44 +44,46 @@ export class EventStoreSocketStream {
     }
     const data$ = this.data$;
     const extra$ = this._extra$;
-    this._command$ = data$
-      .switchMap((latestBuffer: Buffer) => {
-        return Rx.Observable
-          .of(latestBuffer)
-          .exhaustMap((buffer: Buffer) => {
-            const size = buffer.readUInt32LE(0) + UINT32_LENGTH;
-            return data$
-              .startWith(buffer)
-              .scan((acc, cur) => Buffer.concat([acc, cur]), Buffer.alloc(0))
-              .filter((accumulatedBuffer) => accumulatedBuffer.byteLength >= size)
-              .map((completedBuffer) => {
-                let extra;
-                if (completedBuffer.byteLength > size) {
-                  extra = completedBuffer.slice(size);
+    this._command$ = Rx.Observable.merge(
+      this._util$,
+      data$
+        .switchMap((latestBuffer: Buffer) => {
+          return Rx.Observable
+            .of(latestBuffer)
+            .exhaustMap((buffer: Buffer) => {
+              const size = buffer.readUInt32LE(0) + UINT32_LENGTH;
+              return data$
+                .startWith(buffer)
+                .scan((acc, cur) => Buffer.concat([ acc, cur ]), Buffer.alloc(0))
+                .filter((accumulatedBuffer) => accumulatedBuffer.byteLength >= size)
+                .map((completedBuffer) => {
+                  let extra;
+                  if (completedBuffer.byteLength > size) {
+                    extra = completedBuffer.slice(size);
+                  }
+                  return { buffer: completedBuffer.slice(0, size), extra };
+                })
+                .take(1);
+            })
+            .map((completed) => {
+              const tcpPackage = TCPPackage.fromBuffer(completed.buffer);
+              try {
+                const command = getCommand(tcpPackage.code as any, tcpPackage.message, tcpPackage.correlationId);
+                return command;
+              } catch (error) {
+                throw error;
+              } finally {
+                if (completed.extra) {
+                  extra$.next(completed.extra);
                 }
-                return { buffer: completedBuffer.slice(0, size), extra };
-              })
-              .take(1);
-          })
-          .map((completed) => {
-            const tcpPackage = TCPPackage.fromBuffer(completed.buffer);
-            try {
-              const command = getCommand(tcpPackage.code as any, tcpPackage.message, tcpPackage.correlationId);
-              return command;
-            } catch (error) {
-              throw error;
-            } finally {
-              if (completed.extra) {
-                extra$.next(completed.extra);
               }
-            }
-          })
-          .catch((err) => {
-            this._error$.next(err);
-            return Rx.Observable.empty();
-          });
-      })
-      .share();
+            })
+            .catch((err) => {
+              this._error$.next(err);
+              return Rx.Observable.empty();
+            });
+        })
+    ).share();
     return this._command$;
   }
 
