@@ -1,4 +1,5 @@
 import * as Commands from "../command";
+import * as Rx from "rxjs";
 
 import { Credentials } from "../authentication";
 import { Socket } from "net";
@@ -21,6 +22,7 @@ export class TCPDispatcher {
   public async dispatch(command: Commands.ReadStreamEventsForward.Command): Promise<Commands.ReadStreamEventsForwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsBackward.Command): Promise<Commands.ReadAllEventsBackwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsForward.Command): Promise<Commands.ReadAllEventsForwardCompleted.Command>;
+  public async dispatch(command: Commands.SubscribeToStream.Command): Promise<Commands.SubscriptionConfirmation.Command | Commands.SubscriptionDropped.Command>;
   public async dispatch(command: any): Promise<any> {
     const instance = this;
     return new Promise((resolve, reject) => {
