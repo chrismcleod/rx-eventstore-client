@@ -70,7 +70,7 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
-  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Commands.StreamEventAppeared.Observer) {
+  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Commands.StreamEventAppeared.SubscriptionObserver) {
     const existingSubscriptionConfirmation = this._existingStreams[params.eventStreamId];
     if (existingSubscriptionConfirmation) {
       if (observer) this.addSubscriptionObserver(existingSubscriptionConfirmation.key, observer);
@@ -80,13 +80,14 @@ export class Connection {
     const result = await this._dispatcher.dispatch(command);
     if (result.id === Commands.SubscriptionConfirmation.CODE) {
       this._existingStreams[params.eventStreamId] = result;
-      const stream = this._createSubscriptionStreamFromConfirmation(result);
-      if (observer) stream.subscribe(observer);
+      this._createSubscriptionStreamFromConfirmation(result);
+      if (observer) this.addSubscriptionObserver(result.key, observer);
     }
     return result;
   }
 
-  public async addSubscriptionObserver(subscriptionId: string, observer: Commands.StreamEventAppeared.Observer) {
+  public async addSubscriptionObserver(subscriptionId: string, observer: Commands.StreamEventAppeared.SubscriptionObserver) {
+    if (Array.isArray(observer)) observer = this._flattenOrderedObserver(observer);
     this._subscriptions[subscriptionId].subscribe(observer);
   }
 
@@ -120,6 +121,12 @@ export class Connection {
       return command.id === Commands.StreamEventAppeared.CODE && command.correlationId === confirmationCommand.correlationId;
     }).share();
     return this._subscriptions[confirmationCommand.key];
+  }
+
+  private _flattenOrderedObserver<T extends Commands.Command<any, any>>(observers: Commands.StreamEventAppeared.OrderedObserver) {
+    return (event: T) => {
+      observers.forEach(async (observer) => await observer(event));
+    };
   }
 
 }
