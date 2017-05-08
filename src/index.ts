@@ -49,24 +49,26 @@ process.nextTick(async () => {
   const result1 = await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
-  }, (command) => {
-    console.log("handler 1", command.key);
+  }, [
+      (command) => {
+        console.log("handler 1", command.key);
+      }, (command) => {
+        console.log("handler 2", command.key);
+      }, (command) => {
+        console.log("handler 3", command.key);
+      }, (command) => {
+        console.log("handler 4", command.key);
+      }
+    ]);
+  connection.addSubscriptionObserver(result1.key, (command) => {
+    console.log("handler 5", command.key);
   });
   connection.addSubscriptionObserver(result1.key, (command) => {
-    console.log("handler 2", command.key);
+    console.log("handler 6", command.key);
   });
-  console.log(result1);
-  const result2 = await connection.subscribeToStream({
-    eventStreamId: "$ce-user",
-    resolveLinkTos: true
-  }, (command) => {
-    console.log("handler 3", command.key);
+  connection.addSubscriptionObserver(result1.key, (command) => {
+    console.log("handler 7", command.key);
   });
-  connection.addSubscriptionObserver(result2.key, (command) => {
-    console.log("handler 4", command.key);
-  });
-  console.log(result2);
-  console.log(connection._subscriptions);
 });
 
 let cursor = 0;
@@ -78,7 +80,7 @@ setInterval(() => {
     expectedVersion: ExpectedVersion.Any,
     requireMaster: false
   });
-}, 5000);
+}, 500);
 
 setInterval(() => {
   console.log("Creating something else...");
@@ -88,4 +90,4 @@ setInterval(() => {
     expectedVersion: ExpectedVersion.Any,
     requireMaster: false
   });
-}, 5000);
+}, 500);
