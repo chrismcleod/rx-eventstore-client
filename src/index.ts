@@ -22,16 +22,16 @@ for (let i = 0; i < 500; ++i) {
   data.push(faker.helpers.userCard());
 }
 
-const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 
-// const eventData = data.map((e) => ({
-//   data: Buffer.from(JSON.stringify(e)),
-//   dataContentType: 1,
-//   eventId: parse(v4()) as any as Buffer,
-//   eventType: "CreateUser",
-//   metadata: Buffer.alloc(0),
-//   metadataContentType: 1
-// }));
+
+const eventData = data.map((e) => ({
+  data: Buffer.from(JSON.stringify(e)),
+  dataContentType: 1,
+  eventId: parse(v4()) as any as Buffer,
+  eventType: "CreateUser",
+  metadata: Buffer.alloc(0),
+  metadataContentType: 1
+}));
 
 // process.nextTick(async () => {
 //   for (const event of eventData) {
@@ -44,21 +44,48 @@ const connection = new Connection({ host: "192.168.99.100", credentials: { usern
 //   }
 // });
 
+const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
-  let len = 100;
-  let events: Array<any> = [];
-  let pos = 0;
-  while (len >= 100) {
-    const result = await connection.readStreamEventsBackward({
-      eventStreamId: "$ce-user",
-      fromEventNumber: 10,
-      maxCount: 100,
-      requireMaster: false,
-      resolveLinkTos: true
-    });
-    if (result.message && result.message.events) events = events.concat(result.message.events);
-    len = result.message.events.length;
-    pos += 100;
-    console.log(result.message.events[0]);
-  }
+  const result1 = await connection.subscribeToStream({
+    eventStreamId: "$ce-user",
+    resolveLinkTos: true
+  }, (command) => {
+    console.log("handler 1", command.key);
+  });
+  connection.addSubscriptionObserver(result1.key, (command) => {
+    console.log("handler 2", command.key);
+  });
+  console.log(result1);
+  const result2 = await connection.subscribeToStream({
+    eventStreamId: "$ce-user",
+    resolveLinkTos: true
+  }, (command) => {
+    console.log("handler 3", command.key);
+  });
+  connection.addSubscriptionObserver(result2.key, (command) => {
+    console.log("handler 4", command.key);
+  });
+  console.log(result2);
+  console.log(connection._subscriptions);
 });
+
+let cursor = 0;
+setInterval(() => {
+  console.log("Creating user...");
+  connection.writeEvents({
+    eventStreamId: `user-${v4()}`,
+    events: [eventData[cursor++]],
+    expectedVersion: ExpectedVersion.Any,
+    requireMaster: false
+  });
+}, 5000);
+
+setInterval(() => {
+  console.log("Creating something else...");
+  connection.writeEvents({
+    eventStreamId: `productuser-${v4()}`,
+    events: [eventData[cursor++]],
+    expectedVersion: ExpectedVersion.Any,
+    requireMaster: false
+  });
+}, 5000);
