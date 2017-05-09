@@ -1,4 +1,4 @@
-export interface Command<TCode, TMessage = any> {
+export interface Command<TCode extends number = number, TMessage = any> {
   id: TCode;
   key: string;
   correlationId: string;

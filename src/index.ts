@@ -2,6 +2,8 @@ import "long";
 
 import * as faker from "faker";
 
+import { SubscriptionDropped, getCommand } from "./command";
+
 import { Connection } from "./connection/connection";
 import { ExpectedVersion } from "./event";
 import { Position } from "./command/command";
@@ -21,8 +23,6 @@ const data = [];
 for (let i = 0; i < 500; ++i) {
   data.push(faker.helpers.userCard());
 }
-
-
 
 const eventData = data.map((e) => ({
   data: Buffer.from(JSON.stringify(e)),
@@ -44,31 +44,44 @@ const eventData = data.map((e) => ({
 //   }
 // });
 
+let sid: string;
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
-  const result1 = await connection.subscribeToStream({
+
+  const result = await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
-  }, [
-      (command) => {
-        console.log("handler 1", command.key);
-      }, (command) => {
-        console.log("handler 2", command.key);
-      }, (command) => {
-        console.log("handler 3", command.key);
-      }, (command) => {
-        console.log("handler 4", command.key);
-      }
-    ]);
-  connection.addSubscriptionObserver(result1.key, (command) => {
+  }, (command) => {
+    console.log("handler 1", command.key);
+  });
+
+  await connection.subscribeToStream({
+    eventStreamId: "$ce-user",
+    resolveLinkTos: true
+  }, (command) => {
+    console.log("handler 2", command.key);
+  });
+
+  await connection.addSubscriptionObserver(result.key, (command) => {
+    console.log("handler 3", command.key);
+  });
+
+  await connection.subscribeToStream({
+    eventStreamId: "$ce-user",
+    resolveLinkTos: true
+  }, [ (command) => {
+    console.log("handler 4", command.key);
+  }, (command) => {
     console.log("handler 5", command.key);
-  });
-  connection.addSubscriptionObserver(result1.key, (command) => {
+  }]);
+
+  await connection.addSubscriptionObserver(result.key, [ (command) => {
     console.log("handler 6", command.key);
-  });
-  connection.addSubscriptionObserver(result1.key, (command) => {
+  }, (command) => {
     console.log("handler 7", command.key);
-  });
+  }]);
+
+  sid = result.correlationId;
 });
 
 let cursor = 0;
@@ -76,18 +89,14 @@ setInterval(() => {
   console.log("Creating user...");
   connection.writeEvents({
     eventStreamId: `user-${v4()}`,
-    events: [eventData[cursor++]],
+    events: [ eventData[ cursor++ ] ],
     expectedVersion: ExpectedVersion.Any,
     requireMaster: false
   });
-}, 500);
+}, 1000);
 
-setInterval(() => {
-  console.log("Creating something else...");
-  connection.writeEvents({
-    eventStreamId: `productuser-${v4()}`,
-    events: [eventData[cursor++]],
-    expectedVersion: ExpectedVersion.Any,
-    requireMaster: false
-  });
-}, 500);
+setTimeout(() => {
+  console.log("dropping");
+  const command = getCommand(SubscriptionDropped.CODE, { reason: 0 }, sid);
+  connection._$._util$.next(command);
+}, 2000);
