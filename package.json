@@ -7,7 +7,7 @@
     "license": "MIT",
     "devDependencies": {
         "@types/faker": "^4.1.0",
-        "@types/lodash": "^4.14.63",
+        "@types/lodash": "^4.14.64",
         "@types/long": "^3.0.31",
         "@types/node": "^7.0.13",
         "@types/uuid": "^2.0.29",

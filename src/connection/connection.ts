@@ -1,5 +1,6 @@
 import * as Commands from "../command";
 import * as Rx from "rxjs";
+import * as Subscription from "../subscription";
 import * as _ from "lodash";
 
 import { Socket, connect } from "net";
@@ -31,21 +32,13 @@ export class Connection {
   private _$: EventStoreSocketStream;
   private _currentReconnectionAttempts: number;
   private _options: Options;
-  private _subscriptions: { [ key: string ]: Array<Rx.Subscription> };
-  private _subscribableStreams: { [ key: string ]: Rx.Observable<Commands.StreamEventAppeared.Command> };
-  private _existingStreams: { [ key: string ]: Commands.SubscriptionConfirmation.Command };
-  private _subscriptionCommandKeysToStreamId: { [ key: string ]: string };
+  private _subscriptionManager: Subscription.Manager;
 
   constructor(options?: Options) {
     options = options || {};
     options = _.merge({}, Connection._defaultOptions, options);
     this._options = options;
-    this._subscribableStreams = {};
-    this._subscriptions = {};
-    this._existingStreams = {};
-    this._subscriptionCommandKeysToStreamId = {};
     this._handleIncomingCommand = this._handleIncomingCommand.bind(this);
-    this._dropSubscription = this._dropSubscription.bind(this);
     this._currentReconnectionAttempts = 0;
     this._connect();
   }
@@ -75,31 +68,22 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
-  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Commands.StreamEventAppeared.SubscriptionObserver) {
-    const existingSubscriptionConfirmation = this._existingStreams[ params.eventStreamId ];
-    if (existingSubscriptionConfirmation) {
-      if (observer) this.addSubscriptionObserver(existingSubscriptionConfirmation.key, observer);
-      return existingSubscriptionConfirmation;
+  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Subscription.StreamObserver) {
+    if (this._subscriptionManager.isSubscribed(params.eventStreamId)) {
+      if (observer) this._subscriptionManager.subscribe(params.eventStreamId, observer);
+      return true;
     }
     const command = Commands.getCommand(Commands.SubscribeToStream.CODE, params);
     const result = await this._dispatcher.dispatch(command);
     if (result.id === Commands.SubscriptionConfirmation.CODE) {
-      this._existingStreams[ params.eventStreamId ] = result;
-      this._subscriptionCommandKeysToStreamId[ result.key ] = params.eventStreamId;
-      this._createSubscriptionStreamFromConfirmation(result);
-      if (observer) this.addSubscriptionObserver(result.key, observer);
+      if (observer) this._subscriptionManager.subscribe(params.eventStreamId, observer);
+      return true;
     }
-    return result;
-  }
-
-  public async addSubscriptionObserver(subscriptionKey: string, observer: Commands.StreamEventAppeared.SubscriptionObserver) {
-    if (Array.isArray(observer)) observer = this._flattenOrderedObserver(observer);
-    this._subscriptions[ subscriptionKey ].push(this._subscribableStreams[ subscriptionKey ].subscribe(observer));
+    return false;
   }
 
   private _handleIncomingCommand(command: Commands.Command) {
     this._dispatcher.complete(command);
-    if (command.id === Commands.SubscriptionDropped.CODE) this._dropSubscription(command as Commands.SubscriptionDropped.Command);
   }
 
   private _connect() {
@@ -109,6 +93,7 @@ export class Connection {
     this._$ = new EventStoreSocketStream(this._socket);
     this._dispatcher = new TCPDispatcher(this._socket, this._options.credentials);
     this._$.command$.subscribe(this._handleIncomingCommand, console.log, console.log);
+    this._subscriptionManager = new Subscription.Manager(this._$.command$.filter((command) => command.id === Commands.StreamEventAppeared.CODE));
     this._$.error$.subscribe(console.log);
     this._socket.on("connect", () => {
       console.log(`Connected after ${this._currentReconnectionAttempts} attempt${this._currentReconnectionAttempts > 1 ? "s" : ""}`);
@@ -121,33 +106,6 @@ export class Connection {
     this._socket.on("error", (error) => {
       console.log(error);
     });
-  }
-
-  private _createSubscriptionStreamFromConfirmation(confirmationCommand: Commands.SubscriptionConfirmation.Command) {
-    this._subscribableStreams[ confirmationCommand.key ] = this._$.command$.filter((command) => {
-      return command.id === Commands.StreamEventAppeared.CODE && command.correlationId === confirmationCommand.correlationId;
-    }).share();
-    this._subscriptions[ confirmationCommand.key ] = [];
-    return this._subscribableStreams[ confirmationCommand.key ];
-  }
-
-  private _flattenOrderedObserver<T extends Commands.Command<any, any>>(observers: Commands.StreamEventAppeared.OrderedObserver) {
-    return (event: T) => {
-      observers.forEach(async (observer) => await observer(event));
-    };
-  }
-
-  private _dropSubscription(command: Commands.SubscriptionDropped.Command) {
-    const streamId = this._subscriptionCommandKeysToStreamId[ command.correlationId ];
-    if (streamId) {
-      if (this._existingStreams[ streamId ]) delete this._existingStreams[ streamId ];
-      if (this._subscriptions[ command.key ]) {
-        this._subscriptions[ command.key ].forEach((subscription) => subscription.unsubscribe());
-        delete this._subscriptions[ command.key ];
-      }
-      if (this._subscribableStreams[ command.key ]) delete this._subscribableStreams[ command.key ];
-      delete this._subscriptionCommandKeysToStreamId[ command.correlationId ];
-    }
   }
 
 }
