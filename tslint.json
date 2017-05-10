@@ -6,6 +6,7 @@
     "jsRules": {},
     "rules": {
         "curly": false,
+        "interface-over-type-literal": false,
         "max-classes-per-file": [
             false
         ],

@@ -44,11 +44,10 @@ const eventData = data.map((e) => ({
 //   }
 // });
 
-let sid: string;
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
 
-  const result = await connection.subscribeToStream({
+  await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
   }, (command) => {
@@ -62,26 +61,17 @@ process.nextTick(async () => {
     console.log("handler 2", command.key);
   });
 
-  await connection.addSubscriptionObserver(result.key, (command) => {
-    console.log("handler 3", command.key);
-  });
-
   await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
   }, [ (command) => {
+    console.log("handler 3", command.key);
+    return command;
+  }, (command) => {
     console.log("handler 4", command.key);
-  }, (command) => {
-    console.log("handler 5", command.key);
+    return command;
   }]);
 
-  await connection.addSubscriptionObserver(result.key, [ (command) => {
-    console.log("handler 6", command.key);
-  }, (command) => {
-    console.log("handler 7", command.key);
-  }]);
-
-  sid = result.correlationId;
 });
 
 let cursor = 0;
@@ -95,8 +85,8 @@ setInterval(() => {
   });
 }, 1000);
 
-setTimeout(() => {
-  console.log("dropping");
-  const command = getCommand(SubscriptionDropped.CODE, { reason: 0 }, sid);
-  connection._$._util$.next(command);
-}, 2000);
+// setTimeout(() => {
+//   console.log("dropping");
+//   const command = getCommand(SubscriptionDropped.CODE, { reason: 0 }, sid);
+//   connection._$._util$.next(command);
+// }, 2000);
