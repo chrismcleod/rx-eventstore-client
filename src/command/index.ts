@@ -12,6 +12,7 @@ import * as StreamEventAppeared from "./stream-event-appeared";
 import * as SubscribeToStream from "./subscribe-to-stream";
 import * as SubscriptionConfirmation from "./subscription-confirmation";
 import * as SubscriptionDropped from "./subscription-dropped";
+import * as UnsubscribeFromStream from "./unsubscribe-from-stream";
 import * as WriteEvents from "./write-events";
 import * as WriteEventsCompleted from "./write-events-completed";
 
@@ -33,6 +34,7 @@ export {
   StreamEventAppeared,
   SubscriptionConfirmation,
   SubscriptionDropped,
+  UnsubscribeFromStream,
   WriteEvents,
   WriteEventsCompleted
 };
@@ -44,21 +46,22 @@ export interface CommandNamespace {
 }
 
 export const CodeToNamespace = {
-  [BadRequest.CODE]: BadRequest,
-  [ReadAllEventsForward.CODE]: ReadAllEventsForward,
-  [ReadAllEventsForwardCompleted.CODE]: ReadAllEventsForwardCompleted,
-  [ReadAllEventsBackward.CODE]: ReadAllEventsBackward,
-  [ReadAllEventsBackwardCompleted.CODE]: ReadAllEventsBackwardCompleted,
-  [ReadStreamEventsBackward.CODE]: ReadStreamEventsBackward,
-  [ReadStreamEventsBackwardCompleted.CODE]: ReadStreamEventsBackwardCompleted,
-  [ReadStreamEventsForward.CODE]: ReadStreamEventsForward,
-  [ReadStreamEventsForwardCompleted.CODE]: ReadStreamEventsForwardCompleted,
-  [StreamEventAppeared.CODE]: StreamEventAppeared,
-  [SubscribeToStream.CODE]: SubscribeToStream,
-  [SubscriptionConfirmation.CODE]: SubscriptionConfirmation,
-  [SubscriptionDropped.CODE]: SubscriptionDropped,
-  [WriteEvents.CODE]: WriteEvents,
-  [WriteEventsCompleted.CODE]: WriteEventsCompleted
+  [ BadRequest.CODE ]: BadRequest,
+  [ ReadAllEventsForward.CODE ]: ReadAllEventsForward,
+  [ ReadAllEventsForwardCompleted.CODE ]: ReadAllEventsForwardCompleted,
+  [ ReadAllEventsBackward.CODE ]: ReadAllEventsBackward,
+  [ ReadAllEventsBackwardCompleted.CODE ]: ReadAllEventsBackwardCompleted,
+  [ ReadStreamEventsBackward.CODE ]: ReadStreamEventsBackward,
+  [ ReadStreamEventsBackwardCompleted.CODE ]: ReadStreamEventsBackwardCompleted,
+  [ ReadStreamEventsForward.CODE ]: ReadStreamEventsForward,
+  [ ReadStreamEventsForwardCompleted.CODE ]: ReadStreamEventsForwardCompleted,
+  [ StreamEventAppeared.CODE ]: StreamEventAppeared,
+  [ SubscribeToStream.CODE ]: SubscribeToStream,
+  [ SubscriptionConfirmation.CODE ]: SubscriptionConfirmation,
+  [ SubscriptionDropped.CODE ]: SubscriptionDropped,
+  [ UnsubscribeFromStream.CODE ]: UnsubscribeFromStream,
+  [ WriteEvents.CODE ]: WriteEvents,
+  [ WriteEventsCompleted.CODE ]: WriteEventsCompleted
 };
 
 const makeCommandFromParams = (Namespace: CommandNamespace, params?: any, correlationId?: string, encode: boolean = true) => {
@@ -99,9 +102,10 @@ export function getCommand(id: StreamEventAppeared.CODE, params: Buffer | Stream
 export function getCommand(id: SubscribeToStream.CODE, params: Buffer | SubscribeToStream.Params, correlationId?: string): SubscribeToStream.Command;
 export function getCommand(id: SubscriptionConfirmation.CODE, params: Buffer | SubscriptionConfirmation.Params, correlationId?: string): SubscriptionConfirmation.Command;
 export function getCommand(id: SubscriptionDropped.CODE, params: Buffer | SubscriptionDropped.Params, correlationId?: string): SubscriptionDropped.Command;
+export function getCommand(id: UnsubscribeFromStream.CODE, params: Buffer | UnsubscribeFromStream.Params, correlationId?: string): UnsubscribeFromStream.Command;
 export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
 export function getCommand(id: number, params?: any, correlationId?: string) {
-  const CommandNamespace = CodeToNamespace[id];
+  const CommandNamespace = CodeToNamespace[ id ];
   if (CommandNamespace && params instanceof Buffer) return makeCommandFromMessage(CommandNamespace, params, correlationId);
   if (CommandNamespace) return makeCommandFromParams(CommandNamespace, params, correlationId);
   throw new Error(`Unknown command for id ${id}`);
