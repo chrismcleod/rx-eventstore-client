@@ -7,17 +7,21 @@
     "license": "MIT",
     "devDependencies": {
         "@types/faker": "^4.1.0",
-        "@types/lodash": "^4.14.64",
         "@types/long": "^3.0.31",
         "@types/node": "^7.0.13",
         "@types/uuid": "^2.0.29",
         "faker": "^4.1.0",
-        "lodash": "^4.17.4",
         "long": "^3.2.0",
         "protobufjs": "~6.7.3",
         "rxjs": "^5.3.0",
         "string-length": "^1.0.1",
         "uuid": "^3.0.1",
         "uuid-parse": "^1.0.0"
+    },
+    "dependencies": {
+        "@types/lodash": "^4.14.64",
+        "@types/ramda": "^0.0.9",
+        "lodash": "^4.17.4",
+        "ramda": "^0.23.0"
     }
 }

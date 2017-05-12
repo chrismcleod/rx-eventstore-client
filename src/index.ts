@@ -1,12 +1,10 @@
 import "long";
 
+import * as Rx from "rxjs";
 import * as faker from "faker";
-
-import { SubscriptionDropped, getCommand } from "./command";
 
 import { Connection } from "./connection/connection";
 import { ExpectedVersion } from "./event";
-import { Position } from "./command/command";
 import { parse } from "uuid-parse";
 import { v4 } from "uuid";
 
@@ -50,27 +48,23 @@ process.nextTick(async () => {
   await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
-  }, (command) => {
+  }, new Rx.Subscriber((command) => {
     console.log("handler 1", command.key);
-  });
+  }));
 
   await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
-  }, (command) => {
+  }, new Rx.Subscriber((command) => {
     console.log("handler 2", command.key);
-  });
+  }));
 
   await connection.subscribeToStream({
     eventStreamId: "$ce-user",
     resolveLinkTos: true
-  }, [ (command) => {
+  }, new Rx.Subscriber((command) => {
     console.log("handler 3", command.key);
-    return command;
-  }, (command) => {
-    console.log("handler 4", command.key);
-    return command;
-  }]);
+  }));
 
 });
 
@@ -84,6 +78,11 @@ setInterval(() => {
     requireMaster: false
   });
 }, 1000);
+
+setTimeout(() => {
+  console.log("Unsubscribing...");
+  connection.unsubscribeFromStream("$ce-user");
+}, 5000);
 
 // setTimeout(() => {
 //   console.log("dropping");
