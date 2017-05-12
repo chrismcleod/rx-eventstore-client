@@ -1,5 +1,4 @@
 import * as Commands from "../command";
-import * as Rx from "rxjs";
 
 import { Credentials } from "../authentication";
 import { Socket } from "net";
@@ -8,7 +7,7 @@ import { TCPPackage } from "./tcp-package";
 export class TCPDispatcher {
 
   private _credentials?: Credentials;
-  private _promises: { [key: string]: ResolverRejector<Commands.Command<any>> };
+  private _promises: { [ key: string ]: ResolverRejector<Commands.Command<any>> };
   private _socket: Socket;
 
   constructor(socket: Socket, credentials?: Credentials) {
@@ -23,11 +22,12 @@ export class TCPDispatcher {
   public async dispatch(command: Commands.ReadAllEventsBackward.Command): Promise<Commands.ReadAllEventsBackwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsForward.Command): Promise<Commands.ReadAllEventsForwardCompleted.Command>;
   public async dispatch(command: Commands.SubscribeToStream.Command): Promise<Commands.SubscriptionConfirmation.Command | Commands.SubscriptionDropped.Command>;
+  public async dispatch(command: Commands.UnsubscribeFromStream.Command): Promise<Commands.SubscriptionDropped.Command>;
   public async dispatch(command: any): Promise<any> {
     const instance = this;
     return new Promise((resolve, reject) => {
       try {
-        this._promises[command.key] = { resolve, reject };
+        this._promises[ command.key ] = { resolve, reject };
         const tcpPackage = this.encode(command);
         const buffer = tcpPackage.toBuffer();
         instance._socket.write(buffer);
@@ -48,7 +48,7 @@ export class TCPDispatcher {
   }
 
   public complete(command: Commands.Command<any>) {
-    const resolverRejector = this._promises[command.key];
+    const resolverRejector = this._promises[ command.key ];
     if (resolverRejector) resolverRejector.resolve(command);
   }
 

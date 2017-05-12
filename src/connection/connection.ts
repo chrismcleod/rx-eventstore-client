@@ -1,5 +1,4 @@
 import * as Commands from "../command";
-import * as Rx from "rxjs";
 import * as Subscription from "../subscription";
 import * as _ from "lodash";
 
@@ -23,7 +22,7 @@ export class Connection {
     port: 1113,
     reconnect: {
       enabled: true,
-      retries: 3
+      retries: 5
     }
   };
 
@@ -40,6 +39,7 @@ export class Connection {
     this._options = options;
     this._handleIncomingCommand = this._handleIncomingCommand.bind(this);
     this._currentReconnectionAttempts = 0;
+    this._subscriptionManager = new Subscription.Manager();
     this._connect();
   }
 
@@ -68,21 +68,26 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
-  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Subscription.StreamObserver) {
+  public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Subscription.Observer) {
     if (this._subscriptionManager.isSubscribed(params.eventStreamId)) {
-      if (observer) this._subscriptionManager.subscribe(params.eventStreamId, observer);
-      return true;
+      this._subscriptionManager.addSubscription(params.eventStreamId, undefined, observer);
+    } else {
+      const command = Commands.getCommand(Commands.SubscribeToStream.CODE, params);
+      this._subscriptionManager.addSubscription(params.eventStreamId, command.key, observer);
+      await this._dispatcher.dispatch(command);
     }
-    const command = Commands.getCommand(Commands.SubscribeToStream.CODE, params);
-    const result = await this._dispatcher.dispatch(command);
-    if (result.id === Commands.SubscriptionConfirmation.CODE) {
-      if (observer) this._subscriptionManager.subscribe(params.eventStreamId, observer);
-      return true;
+  }
+
+  public async unsubscribeFromStream(streamId: string) {
+    const correlationId = this._subscriptionManager.getCorrelationId(streamId);
+    if (correlationId) {
+      const command = Commands.getCommand(Commands.UnsubscribeFromStream.CODE, {}, correlationId);
+      await this._dispatcher.dispatch(command);
     }
-    return false;
   }
 
   private _handleIncomingCommand(command: Commands.Command) {
+    console.log(command.id, command.key);
     this._dispatcher.complete(command);
   }
 
@@ -93,7 +98,7 @@ export class Connection {
     this._$ = new EventStoreSocketStream(this._socket);
     this._dispatcher = new TCPDispatcher(this._socket, this._options.credentials);
     this._$.command$.subscribe(this._handleIncomingCommand, console.log, console.log);
-    this._subscriptionManager = new Subscription.Manager(this._$.command$.filter((command) => command.id === Commands.StreamEventAppeared.CODE));
+    this._resetSubscriptionManager();
     this._$.error$.subscribe(console.log);
     this._socket.on("connect", () => {
       console.log(`Connected after ${this._currentReconnectionAttempts} attempt${this._currentReconnectionAttempts > 1 ? "s" : ""}`);
@@ -101,11 +106,27 @@ export class Connection {
     });
     this._socket.on("close", (error) => {
       console.log(`Connection closed ${!!error ? "with" : "without"} error.`);
-      if (this._options.reconnect!.enabled && this._currentReconnectionAttempts <= this._options.reconnect!.retries!) this._connect();
+      if (this._options.reconnect!.enabled && this._currentReconnectionAttempts <= this._options.reconnect!.retries!) {
+        setTimeout(this._connect.bind(this), 5000);
+      }
     });
     this._socket.on("error", (error) => {
       console.log(error);
     });
+  }
+
+  private async _resetSubscriptionManager() {
+    this._subscriptionManager.sources = {
+      appeared$: this._$.command$.filter((command) => command.id === Commands.StreamEventAppeared.CODE),
+      dropped$: this._$.command$.filter((command) => command.id === Commands.SubscriptionDropped.CODE)
+    };
+    const resets: Array<{ streamId: string, correlationId: string }> = [];
+    for (const streamId of this._subscriptionManager.streamIds) {
+      const command = Commands.getCommand(Commands.SubscribeToStream.CODE, { eventStreamId: streamId, resolveLinkTos: true });
+      const result = await this._dispatcher.dispatch(command);
+      if (result.id === Commands.SubscriptionConfirmation.CODE) resets.push({ streamId, correlationId: command.key });
+    }
+    this._subscriptionManager.resetSubscriptions(resets);
   }
 
 }
