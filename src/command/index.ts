@@ -1,4 +1,6 @@
 import * as BadRequest from "./bad-request";
+import * as DeleteStream from "./delete-stream";
+import * as DeleteStreamCompleted from "./delete-stream-completed";
 import * as Heartbeat from "./heartbeat";
 import * as ReadAllEventsBackward from "./read-all-events-backward";
 import * as ReadAllEventsBackwardCompleted from "./read-all-events-backward-completed";
@@ -29,6 +31,8 @@ import { v4 } from "uuid";
 
 export {
   Command,
+  DeleteStream,
+  DeleteStreamCompleted,
   Heartbeat,
   ReadAllEventsBackward,
   ReadAllEventsBackwardCompleted,
@@ -63,6 +67,8 @@ export interface CommandNamespace {
 
 export const CodeToNamespace = {
   [ BadRequest.CODE ]: BadRequest,
+  [ DeleteStream.CODE ]: DeleteStream,
+  [ DeleteStreamCompleted.CODE ]: DeleteStreamCompleted,
   [ ReadAllEventsForward.CODE ]: ReadAllEventsForward,
   [ ReadAllEventsForwardCompleted.CODE ]: ReadAllEventsForwardCompleted,
   [ ReadAllEventsBackward.CODE ]: ReadAllEventsBackward,
@@ -112,8 +118,9 @@ const makeCommandFromMessage = (Namespace: CommandNamespace, message?: any, corr
   return makeCommandFromParams(Namespace, params, correlationId);
 };
 
-export function getCommand(id: WriteEvents.CODE, params: Buffer | WriteEvents.Params, correlationId?: string): WriteEvents.Command;
-export function getCommand(id: WriteEventsCompleted.CODE, params: Buffer | WriteEventsCompleted.Params, correlationId?: string): WriteEventsCompleted.Command;
+export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
+export function getCommand(id: DeleteStream.CODE, params: Buffer | DeleteStream.Params, correlationId?: string): DeleteStream.Command;
+export function getCommand(id: DeleteStreamCompleted.CODE, params: Buffer | DeleteStreamCompleted.Params, correlationId?: string): DeleteStreamCompleted.Command;
 export function getCommand(id: ReadAllEventsBackward.CODE, params: Buffer | ReadAllEventsBackward.Params, correlationId?: string): ReadAllEventsBackward.Command;
 export function getCommand(id: ReadAllEventsBackwardCompleted.CODE, params: Buffer | ReadAllEventsBackwardCompleted.Params, correlationId?: string): ReadAllEventsBackwardCompleted.Command;
 export function getCommand(id: ReadAllEventsForward.CODE, params: Buffer | ReadAllEventsForward.Params, correlationId?: string): ReadAllEventsForward.Command;
@@ -135,7 +142,8 @@ export function getCommand(id: TransactionStartCompleted.CODE, params: Buffer | 
 export function getCommand(id: TransactionWrite.CODE, params: Buffer | TransactionWrite.Params, correlationId?: string): TransactionWrite.Command;
 export function getCommand(id: TransactionWriteCompleted.CODE, params: Buffer | TransactionWriteCompleted.Params, correlationId?: string): TransactionWriteCompleted.Command;
 export function getCommand(id: UnsubscribeFromStream.CODE, params: Buffer | UnsubscribeFromStream.Params, correlationId?: string): UnsubscribeFromStream.Command;
-export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
+export function getCommand(id: WriteEvents.CODE, params: Buffer | WriteEvents.Params, correlationId?: string): WriteEvents.Command;
+export function getCommand(id: WriteEventsCompleted.CODE, params: Buffer | WriteEventsCompleted.Params, correlationId?: string): WriteEventsCompleted.Command;
 export function getCommand(id: number, params?: any, correlationId?: string) {
   const CommandNamespace = CodeToNamespace[ id ];
   if (CommandNamespace && params instanceof Buffer) return makeCommandFromMessage(CommandNamespace, params, correlationId);
