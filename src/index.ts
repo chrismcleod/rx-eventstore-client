@@ -53,13 +53,32 @@ process.nextTick(async () => {
 
   const txid = result.message.transactionId;
 
-  const writeResult = await connection.continueTransaction({
+  const writeResult1 = await connection.continueTransaction({
     events: [ eventData[ 0 ] ],
     requireMaster: false,
     transactionId: txid
   });
 
-  console.log(writeResult);
+  const writeResult2 = await connection.continueTransaction({
+    events: [ eventData[ 1 ] ],
+    requireMaster: false,
+    transactionId: txid
+  });
+
+  const writeResult3 = await connection.continueTransaction({
+    events: [ eventData[ 2 ] ],
+    requireMaster: false,
+    transactionId: txid
+  });
+
+  console.log(writeResult1, writeResult2, writeResult3);
+
+  const commitResult = await connection.commitTransaction({
+    requireMaster: false,
+    transactionId: txid
+  });
+
+  console.log(commitResult);
 
   // await connection.subscribeToStream({
   //   eventStreamId: "$ce-user",

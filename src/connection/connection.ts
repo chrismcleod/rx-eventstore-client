@@ -79,6 +79,11 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
+  public async commitTransaction(params: Commands.TransactionCommit.Params) {
+    const command = Commands.getCommand(Commands.TransactionCommit.CODE, params);
+    return this._dispatcher.dispatch(command);
+  }
+
   public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Subscription.Observer) {
     if (this._subscriptionManager.isSubscribed(params.eventStreamId)) {
       this._subscriptionManager.addSubscription(params.eventStreamId, undefined, observer);
