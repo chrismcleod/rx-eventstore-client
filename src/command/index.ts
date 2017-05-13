@@ -16,6 +16,8 @@ import * as ReadStreamEventsBackward from "./read-stream-events-backward";
 import * as ReadStreamEventsBackwardCompleted from "./read-stream-events-backward-completed";
 import * as ReadStreamEventsForward from "./read-stream-events-forward";
 import * as ReadStreamEventsForwardCompleted from "./read-stream-events-forward-completed";
+import * as ScavengeDatabase from "./scavenge-database";
+import * as ScavengeDatabaseCompleted from "./scavenge-database-completed";
 import * as StreamEventAppeared from "./stream-event-appeared";
 import * as SubscribeToStream from "./subscribe-to-stream";
 import * as SubscriptionConfirmation from "./subscription-confirmation";
@@ -52,6 +54,8 @@ export {
   ReadStreamEventsBackwardCompleted,
   ReadStreamEventsForward,
   ReadStreamEventsForwardCompleted,
+  ScavengeDatabase,
+  ScavengeDatabaseCompleted,
   SubscribeToStream,
   StreamEventAppeared,
   SubscriptionConfirmation,
@@ -91,6 +95,8 @@ export const CodeToNamespace = {
   [ ReadStreamEventsBackwardCompleted.CODE ]: ReadStreamEventsBackwardCompleted,
   [ ReadStreamEventsForward.CODE ]: ReadStreamEventsForward,
   [ ReadStreamEventsForwardCompleted.CODE ]: ReadStreamEventsForwardCompleted,
+  [ ScavengeDatabase.CODE ]: ScavengeDatabase,
+  [ ScavengeDatabaseCompleted.CODE ]: ScavengeDatabaseCompleted,
   [ StreamEventAppeared.CODE ]: StreamEventAppeared,
   [ SubscribeToStream.CODE ]: SubscribeToStream,
   [ SubscriptionConfirmation.CODE ]: SubscriptionConfirmation,
@@ -147,6 +153,8 @@ export function getCommand(id: ReadStreamEventsBackward.CODE, params: Buffer | R
 export function getCommand(id: ReadStreamEventsBackwardCompleted.CODE, params: Buffer | ReadStreamEventsBackwardCompleted.Params, correlationId?: string): ReadStreamEventsBackwardCompleted.Command;
 export function getCommand(id: ReadStreamEventsForward.CODE, params: Buffer | ReadStreamEventsForward.Params, correlationId?: string): ReadStreamEventsForward.Command;
 export function getCommand(id: ReadStreamEventsForwardCompleted.CODE, params: Buffer | ReadStreamEventsForwardCompleted.Params, correlationId?: string): ReadStreamEventsForwardCompleted.Command;
+export function getCommand(id: ScavengeDatabase.CODE, params: Buffer | ScavengeDatabase.Params, correlationId?: string): ScavengeDatabase.Command;
+export function getCommand(id: ScavengeDatabaseCompleted.CODE, params: Buffer | ScavengeDatabaseCompleted.Params, correlationId?: string): ScavengeDatabaseCompleted.Command;
 export function getCommand(id: StreamEventAppeared.CODE, params: Buffer | StreamEventAppeared.Params, correlationId?: string): StreamEventAppeared.Command;
 export function getCommand(id: SubscribeToStream.CODE, params: Buffer | SubscribeToStream.Params, correlationId?: string): SubscribeToStream.Command;
 export function getCommand(id: SubscriptionConfirmation.CODE, params: Buffer | SubscriptionConfirmation.Params, correlationId?: string): SubscriptionConfirmation.Command;
