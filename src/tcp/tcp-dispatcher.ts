@@ -22,6 +22,7 @@ export class TCPDispatcher {
   public async dispatch(command: Commands.ReadAllEventsBackward.Command): Promise<Commands.ReadAllEventsBackwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsForward.Command): Promise<Commands.ReadAllEventsForwardCompleted.Command>;
   public async dispatch(command: Commands.SubscribeToStream.Command): Promise<Commands.SubscriptionConfirmation.Command | Commands.SubscriptionDropped.Command>;
+  public async dispatch(command: Commands.TransactionStart.Command): Promise<Commands.TransactionStartCompleted.Command>;
   public async dispatch(command: Commands.UnsubscribeFromStream.Command): Promise<Commands.SubscriptionDropped.Command>;
   public async dispatch(command: any): Promise<any> {
     const instance = this;
