@@ -12,6 +12,8 @@ import * as StreamEventAppeared from "./stream-event-appeared";
 import * as SubscribeToStream from "./subscribe-to-stream";
 import * as SubscriptionConfirmation from "./subscription-confirmation";
 import * as SubscriptionDropped from "./subscription-dropped";
+import * as TransactionCommit from "./transaction-commit";
+import * as TransactionCommitCompleted from "./transaction-commit-completed";
 import * as TransactionStart from "./transaction-start";
 import * as TransactionStartCompleted from "./transaction-start-completed";
 import * as TransactionWrite from "./transaction-write";
@@ -38,6 +40,8 @@ export {
   StreamEventAppeared,
   SubscriptionConfirmation,
   SubscriptionDropped,
+  TransactionCommit,
+  TransactionCommitCompleted,
   TransactionStart,
   TransactionStartCompleted,
   TransactionWrite,
@@ -67,6 +71,8 @@ export const CodeToNamespace = {
   [ SubscribeToStream.CODE ]: SubscribeToStream,
   [ SubscriptionConfirmation.CODE ]: SubscriptionConfirmation,
   [ SubscriptionDropped.CODE ]: SubscriptionDropped,
+  [ TransactionCommit.CODE ]: TransactionCommit,
+  [ TransactionCommitCompleted.CODE ]: TransactionCommitCompleted,
   [ TransactionStart.CODE ]: TransactionStart,
   [ TransactionStartCompleted.CODE ]: TransactionStartCompleted,
   [ TransactionWrite.CODE ]: TransactionWrite,
@@ -114,6 +120,8 @@ export function getCommand(id: StreamEventAppeared.CODE, params: Buffer | Stream
 export function getCommand(id: SubscribeToStream.CODE, params: Buffer | SubscribeToStream.Params, correlationId?: string): SubscribeToStream.Command;
 export function getCommand(id: SubscriptionConfirmation.CODE, params: Buffer | SubscriptionConfirmation.Params, correlationId?: string): SubscriptionConfirmation.Command;
 export function getCommand(id: SubscriptionDropped.CODE, params: Buffer | SubscriptionDropped.Params, correlationId?: string): SubscriptionDropped.Command;
+export function getCommand(id: TransactionCommit.CODE, params: Buffer | TransactionCommit.Params, correlationId?: string): TransactionCommit.Command;
+export function getCommand(id: TransactionCommitCompleted.CODE, params: Buffer | TransactionCommitCompleted.Params, correlationId?: string): TransactionCommitCompleted.Command;
 export function getCommand(id: TransactionStart.CODE, params: Buffer | TransactionStart.Params, correlationId?: string): TransactionStart.Command;
 export function getCommand(id: TransactionStartCompleted.CODE, params: Buffer | TransactionStartCompleted.Params, correlationId?: string): TransactionStartCompleted.Command;
 export function getCommand(id: TransactionWrite.CODE, params: Buffer | TransactionWrite.Params, correlationId?: string): TransactionWrite.Command;
