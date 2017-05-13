@@ -48,6 +48,10 @@ process.nextTick(async () => {
   const result = await connection.scavengeDatabase();
   console.log(result);
 
+  await connection.subscribeToStream({ eventStreamId: "", resolveLinkTos: true }, new Rx.Subscriber((command) => {
+    console.log("handler", command);
+  }));
+
   // await connection.subscribeToAll(new Rx.Subscriber((command) => {
   //   console.log("handler 1", command);
   // }));

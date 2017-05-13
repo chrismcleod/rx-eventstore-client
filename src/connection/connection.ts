@@ -126,7 +126,7 @@ export class Connection {
   }
 
   public async subscribeToAll(observer?: Subscription.Observer, resolveLinkTos = true) {
-    this.subscribeToStream({ eventStreamId: "$streams", resolveLinkTos }, observer);
+    this.subscribeToStream({ eventStreamId: "", resolveLinkTos }, observer);
   }
 
   public async unsubscribeFromStream(streamId: string) {
