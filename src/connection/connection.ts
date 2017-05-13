@@ -137,6 +137,11 @@ export class Connection {
     }
   }
 
+  public scavengeDatabase(params: Commands.ScavengeDatabase.Params = {}) {
+    const command = Commands.getCommand(Commands.ScavengeDatabase.CODE, params);
+    return this._dispatcher.dispatch(command);
+  }
+
   private _handleIncomingCommand(command: Commands.Command) {
     console.log(command.id, command.key);
     this._dispatcher.complete(command);
