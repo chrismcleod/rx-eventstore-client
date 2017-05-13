@@ -45,8 +45,16 @@ const eventData = data.map((e) => ({
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
 
-  const result = await connection.authenticate();
-  console.log(result);
+  await connection.subscribeToAll(new Rx.Subscriber((command) => {
+    console.log("handler 1", command);
+  }));
+
+  await connection.subscribeToStream({ eventStreamId: "$ce-user", resolveLinkTos: true }, new Rx.Subscriber((command) => {
+    console.log("handler 2", command);
+  }));
+
+  // const result = await connection.authenticate();
+  // console.log(result);
 
   // const result = await connection.readEvent({ eventStreamId: "$ce-user", eventNumber: 0, resolveLinkTos: true, requireMaster: false });
   // console.log(result);
@@ -100,16 +108,16 @@ process.nextTick(async () => {
 
 });
 
-// let cursor = 0;
-// setInterval(() => {
-//   console.log("Creating user...");
-//   connection.writeEvents({
-//     eventStreamId: `user-${v4()}`,
-//     events: [ eventData[ cursor++ ] ],
-//     expectedVersion: ExpectedVersion.Any,
-//     requireMaster: false
-//   });
-// }, 1000);
+let cursor = 0;
+setInterval(() => {
+  console.log("Creating user...");
+  connection.writeEvents({
+    eventStreamId: `user-${v4()}`,
+    events: [ eventData[ cursor++ ] ],
+    expectedVersion: ExpectedVersion.Any,
+    requireMaster: false
+  });
+}, 1000);
 
 // setTimeout(() => {
 //   console.log("dropping");
