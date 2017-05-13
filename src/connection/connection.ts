@@ -89,7 +89,7 @@ export class Connection {
   public async startTransaction(params: Commands.TransactionStart.Params) {
     const command = Commands.getCommand(Commands.TransactionStart.CODE, params);
     const result = await this._dispatcher.dispatch(command);
-    if (result.message.result === 0) this._transactionManager.addTransaction(new Transaction.Transaction(result.message.transactionId));
+    if (result.id === Commands.TransactionStartCompleted.CODE && result.message.result === 0) this._transactionManager.addTransaction(new Transaction.Transaction(result.message.transactionId));
     return result;
   }
 
@@ -105,7 +105,7 @@ export class Connection {
     if (this._transactionManager.canCommitTransaction(params.transactionId)) {
       const command = Commands.getCommand(Commands.TransactionCommit.CODE, params);
       const result = await this._dispatcher.dispatch(command);
-      if (result.message.result === 0) this._transactionManager.commitTransaction(params.transactionId);
+      if (result.id === Commands.TransactionCommitCompleted.CODE && result.message.result === 0) this._transactionManager.commitTransaction(params.transactionId);
       return result;
     }
     return false;
@@ -123,6 +123,10 @@ export class Connection {
       this._subscriptionManager.addSubscription(params.eventStreamId, command.key, observer);
       await this._dispatcher.dispatch(command);
     }
+  }
+
+  public async subscribeToAll(observer?: Subscription.Observer, resolveLinkTos = true) {
+    this.subscribeToStream({ eventStreamId: "$streams", resolveLinkTos }, observer);
   }
 
   public async unsubscribeFromStream(streamId: string) {
