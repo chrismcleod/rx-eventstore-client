@@ -45,42 +45,45 @@ const eventData = data.map((e) => ({
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
 
-  const result = await connection.startTransaction({
-    eventStreamId: `user-${v4()}`,
-    expectedVersion: ExpectedVersion.Any,
-    requireMaster: false
-  });
+  const result = await connection.readEvent({ eventStreamId: "$ce-user", eventNumber: 0, resolveLinkTos: true, requireMaster: false });
+  console.log(result);
 
-  const txid = result.message.transactionId;
+  // const result = await connection.startTransaction({
+  //   eventStreamId: `user-${v4()}`,
+  //   expectedVersion: ExpectedVersion.Any,
+  //   requireMaster: false
+  // });
 
-  const writeResult1 = await connection.continueTransaction({
-    events: [ eventData[ 0 ] ],
-    requireMaster: false,
-    transactionId: txid
-  });
+  // const txid = result.message.transactionId;
 
-  const writeResult2 = await connection.continueTransaction({
-    events: [ eventData[ 1 ] ],
-    requireMaster: false,
-    transactionId: txid
-  });
+  // const writeResult1 = await connection.continueTransaction({
+  //   events: [ eventData[ 0 ] ],
+  //   requireMaster: false,
+  //   transactionId: txid
+  // });
 
-  const writeResult3 = await connection.continueTransaction({
-    events: [ eventData[ 2 ] ],
-    requireMaster: false,
-    transactionId: txid
-  });
+  // const writeResult2 = await connection.continueTransaction({
+  //   events: [ eventData[ 1 ] ],
+  //   requireMaster: false,
+  //   transactionId: txid
+  // });
 
-  connection.rollbackTransaction(txid);
+  // const writeResult3 = await connection.continueTransaction({
+  //   events: [ eventData[ 2 ] ],
+  //   requireMaster: false,
+  //   transactionId: txid
+  // });
 
-  console.log(writeResult1, writeResult2, writeResult3);
+  // connection.rollbackTransaction(txid);
 
-  const commitResult = await connection.commitTransaction({
-    requireMaster: false,
-    transactionId: txid
-  });
+  // console.log(writeResult1, writeResult2, writeResult3);
 
-  console.log(commitResult);
+  // const commitResult = await connection.commitTransaction({
+  //   requireMaster: false,
+  //   transactionId: txid
+  // });
+
+  // console.log(commitResult);
 
   // await connection.subscribeToStream({
   //   eventStreamId: "$ce-user",
