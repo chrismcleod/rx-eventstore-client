@@ -6,6 +6,7 @@ import { Socket, connect } from "net";
 
 import { Credentials } from "../authentication";
 import { EventStoreSocketStream } from "./event-store-socket-stream";
+import { Params } from "./../command/read-all-events/index";
 import { TCPDispatcher } from "../tcp/tcp-dispatcher";
 
 interface Options {
@@ -70,6 +71,11 @@ export class Connection {
 
   public async startTransaction(params: Commands.TransactionStart.Params) {
     const command = Commands.getCommand(Commands.TransactionStart.CODE, params);
+    return this._dispatcher.dispatch(command);
+  }
+
+  public async continueTransaction(params: Commands.TransactionWrite.Params) {
+    const command = Commands.getCommand(Commands.TransactionWrite.CODE, params);
     return this._dispatcher.dispatch(command);
   }
 

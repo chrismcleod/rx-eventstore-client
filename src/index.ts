@@ -51,7 +51,15 @@ process.nextTick(async () => {
     requireMaster: false
   });
 
-  console.log(result);
+  const txid = result.message.transactionId;
+
+  const writeResult = await connection.continueTransaction({
+    events: [ eventData[ 0 ] ],
+    requireMaster: false,
+    transactionId: txid
+  });
+
+  console.log(writeResult);
 
   // await connection.subscribeToStream({
   //   eventStreamId: "$ce-user",
