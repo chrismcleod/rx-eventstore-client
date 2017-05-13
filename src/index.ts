@@ -45,44 +45,33 @@ const eventData = data.map((e) => ({
 const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
 process.nextTick(async () => {
 
-  await connection.subscribeToStream({
-    eventStreamId: "$ce-user",
-    resolveLinkTos: true
-  }, new Rx.Subscriber((command) => {
-    console.log("handler 1", command.key);
-  }));
-
-  await connection.subscribeToStream({
-    eventStreamId: "$ce-user",
-    resolveLinkTos: true
-  }, new Rx.Subscriber((command) => {
-    console.log("handler 2", command.key);
-  }));
-
-  await connection.subscribeToStream({
-    eventStreamId: "$ce-user",
-    resolveLinkTos: true
-  }, new Rx.Subscriber((command) => {
-    console.log("handler 3", command.key);
-  }));
-
-});
-
-let cursor = 0;
-setInterval(() => {
-  console.log("Creating user...");
-  connection.writeEvents({
+  const result = await connection.startTransaction({
     eventStreamId: `user-${v4()}`,
-    events: [ eventData[ cursor++ ] ],
     expectedVersion: ExpectedVersion.Any,
     requireMaster: false
   });
-}, 1000);
 
-setTimeout(() => {
-  console.log("Unsubscribing...");
-  connection.unsubscribeFromStream("$ce-user");
-}, 5000);
+  console.log(result);
+
+  // await connection.subscribeToStream({
+  //   eventStreamId: "$ce-user",
+  //   resolveLinkTos: true
+  // }, new Rx.Subscriber((command) => {
+  //   console.log("handler 3", command.key);
+  // }));
+
+});
+
+// let cursor = 0;
+// setInterval(() => {
+//   console.log("Creating user...");
+//   connection.writeEvents({
+//     eventStreamId: `user-${v4()}`,
+//     events: [ eventData[ cursor++ ] ],
+//     expectedVersion: ExpectedVersion.Any,
+//     requireMaster: false
+//   });
+// }, 1000);
 
 // setTimeout(() => {
 //   console.log("dropping");

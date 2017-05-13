@@ -12,6 +12,8 @@ import * as StreamEventAppeared from "./stream-event-appeared";
 import * as SubscribeToStream from "./subscribe-to-stream";
 import * as SubscriptionConfirmation from "./subscription-confirmation";
 import * as SubscriptionDropped from "./subscription-dropped";
+import * as TransactionStart from "./transaction-start";
+import * as TransactionStartCompleted from "./transaction-start-completed";
 import * as UnsubscribeFromStream from "./unsubscribe-from-stream";
 import * as WriteEvents from "./write-events";
 import * as WriteEventsCompleted from "./write-events-completed";
@@ -34,6 +36,8 @@ export {
   StreamEventAppeared,
   SubscriptionConfirmation,
   SubscriptionDropped,
+  TransactionStart,
+  TransactionStartCompleted,
   UnsubscribeFromStream,
   WriteEvents,
   WriteEventsCompleted
@@ -59,6 +63,8 @@ export const CodeToNamespace = {
   [ SubscribeToStream.CODE ]: SubscribeToStream,
   [ SubscriptionConfirmation.CODE ]: SubscriptionConfirmation,
   [ SubscriptionDropped.CODE ]: SubscriptionDropped,
+  [ TransactionStart.CODE ]: TransactionStart,
+  [ TransactionStartCompleted.CODE ]: TransactionStartCompleted,
   [ UnsubscribeFromStream.CODE ]: UnsubscribeFromStream,
   [ WriteEvents.CODE ]: WriteEvents,
   [ WriteEventsCompleted.CODE ]: WriteEventsCompleted
@@ -102,6 +108,8 @@ export function getCommand(id: StreamEventAppeared.CODE, params: Buffer | Stream
 export function getCommand(id: SubscribeToStream.CODE, params: Buffer | SubscribeToStream.Params, correlationId?: string): SubscribeToStream.Command;
 export function getCommand(id: SubscriptionConfirmation.CODE, params: Buffer | SubscriptionConfirmation.Params, correlationId?: string): SubscriptionConfirmation.Command;
 export function getCommand(id: SubscriptionDropped.CODE, params: Buffer | SubscriptionDropped.Params, correlationId?: string): SubscriptionDropped.Command;
+export function getCommand(id: TransactionStart.CODE, params: Buffer | TransactionStart.Params, correlationId?: string): TransactionStart.Command;
+export function getCommand(id: TransactionStartCompleted.CODE, params: Buffer | TransactionStartCompleted.Params, correlationId?: string): TransactionStartCompleted.Command;
 export function getCommand(id: UnsubscribeFromStream.CODE, params: Buffer | UnsubscribeFromStream.Params, correlationId?: string): UnsubscribeFromStream.Command;
 export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
 export function getCommand(id: number, params?: any, correlationId?: string) {
