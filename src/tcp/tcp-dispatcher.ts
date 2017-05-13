@@ -16,6 +16,7 @@ export class TCPDispatcher {
     this._socket = socket;
   }
 
+  public async dispatch(command: Commands.Authenticate.Command): Promise<Commands.NotAuthenticated.Command | Commands.Authenticated.Command>;
   public async dispatch(command: Commands.DeleteStream.Command): Promise<Commands.DeleteStreamCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsBackward.Command): Promise<Commands.ReadAllEventsBackwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsForward.Command): Promise<Commands.ReadAllEventsForwardCompleted.Command>;
