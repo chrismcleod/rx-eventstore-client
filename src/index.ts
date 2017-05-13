@@ -48,6 +48,9 @@ process.nextTick(async () => {
   const result = await connection.readEvent({ eventStreamId: "$ce-user", eventNumber: 0, resolveLinkTos: true, requireMaster: false });
   console.log(result);
 
+  const deleteResult = await connection.deleteStream({ eventStreamId: result.message.event.event!.eventStreamId, expectedVersion: ExpectedVersion.Any, requireMaster: false, hardDelete: true });
+  console.log(deleteResult);
+
   // const result = await connection.startTransaction({
   //   eventStreamId: `user-${v4()}`,
   //   expectedVersion: ExpectedVersion.Any,
