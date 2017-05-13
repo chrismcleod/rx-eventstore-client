@@ -4,6 +4,8 @@ import * as ReadAllEventsBackward from "./read-all-events-backward";
 import * as ReadAllEventsBackwardCompleted from "./read-all-events-backward-completed";
 import * as ReadAllEventsForward from "./read-all-events-forward";
 import * as ReadAllEventsForwardCompleted from "./read-all-events-forward-completed";
+import * as ReadEvent from "./read-event";
+import * as ReadEventCompleted from "./read-event-completed";
 import * as ReadStreamEventsBackward from "./read-stream-events-backward";
 import * as ReadStreamEventsBackwardCompleted from "./read-stream-events-backward-completed";
 import * as ReadStreamEventsForward from "./read-stream-events-forward";
@@ -32,6 +34,8 @@ export {
   ReadAllEventsBackwardCompleted,
   ReadAllEventsForward,
   ReadAllEventsForwardCompleted,
+  ReadEvent,
+  ReadEventCompleted,
   ReadStreamEventsBackward,
   ReadStreamEventsBackwardCompleted,
   ReadStreamEventsForward,
@@ -63,6 +67,8 @@ export const CodeToNamespace = {
   [ ReadAllEventsForwardCompleted.CODE ]: ReadAllEventsForwardCompleted,
   [ ReadAllEventsBackward.CODE ]: ReadAllEventsBackward,
   [ ReadAllEventsBackwardCompleted.CODE ]: ReadAllEventsBackwardCompleted,
+  [ ReadEvent.CODE ]: ReadEvent,
+  [ ReadEventCompleted.CODE ]: ReadEventCompleted,
   [ ReadStreamEventsBackward.CODE ]: ReadStreamEventsBackward,
   [ ReadStreamEventsBackwardCompleted.CODE ]: ReadStreamEventsBackwardCompleted,
   [ ReadStreamEventsForward.CODE ]: ReadStreamEventsForward,
@@ -112,6 +118,8 @@ export function getCommand(id: ReadAllEventsBackward.CODE, params: Buffer | Read
 export function getCommand(id: ReadAllEventsBackwardCompleted.CODE, params: Buffer | ReadAllEventsBackwardCompleted.Params, correlationId?: string): ReadAllEventsBackwardCompleted.Command;
 export function getCommand(id: ReadAllEventsForward.CODE, params: Buffer | ReadAllEventsForward.Params, correlationId?: string): ReadAllEventsForward.Command;
 export function getCommand(id: ReadAllEventsForwardCompleted.CODE, params: Buffer | ReadAllEventsForwardCompleted.Params, correlationId?: string): ReadAllEventsForwardCompleted.Command;
+export function getCommand(id: ReadEvent.CODE, params: Buffer | ReadEvent.Params, correlationId?: string): ReadEvent.Command;
+export function getCommand(id: ReadEventCompleted.CODE, params: Buffer | ReadEventCompleted.Params, correlationId?: string): ReadEventCompleted.Command;
 export function getCommand(id: ReadStreamEventsBackward.CODE, params: Buffer | ReadStreamEventsBackward.Params, correlationId?: string): ReadStreamEventsBackward.Command;
 export function getCommand(id: ReadStreamEventsBackwardCompleted.CODE, params: Buffer | ReadStreamEventsBackwardCompleted.Params, correlationId?: string): ReadStreamEventsBackwardCompleted.Command;
 export function getCommand(id: ReadStreamEventsForward.CODE, params: Buffer | ReadStreamEventsForward.Params, correlationId?: string): ReadStreamEventsForward.Command;
