@@ -46,6 +46,11 @@ export class Connection {
     this._connect();
   }
 
+  public async authenticate() {
+    const command = Commands.getCommand(Commands.Authenticate.CODE);
+    return this._dispatcher.dispatch(command);
+  }
+
   public async writeEvents(params: Commands.WriteEvents.Params) {
     const command = Commands.getCommand(Commands.WriteEvents.CODE, params);
     return this._dispatcher.dispatch(command);

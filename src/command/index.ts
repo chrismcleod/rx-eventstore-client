@@ -1,7 +1,10 @@
+import * as Authenticate from "./authenticate";
+import * as Authenticated from "./authenticated";
 import * as BadRequest from "./bad-request";
 import * as DeleteStream from "./delete-stream";
 import * as DeleteStreamCompleted from "./delete-stream-completed";
 import * as Heartbeat from "./heartbeat";
+import * as NotAuthenticated from "./not-authenticated";
 import * as ReadAllEventsBackward from "./read-all-events-backward";
 import * as ReadAllEventsBackwardCompleted from "./read-all-events-backward-completed";
 import * as ReadAllEventsForward from "./read-all-events-forward";
@@ -30,6 +33,9 @@ import { Command } from "./command";
 import { v4 } from "uuid";
 
 export {
+  Authenticate,
+  Authenticated,
+  NotAuthenticated,
   Command,
   DeleteStream,
   DeleteStreamCompleted,
@@ -66,6 +72,9 @@ export interface CommandNamespace {
 }
 
 export const CodeToNamespace = {
+  [ Authenticate.CODE ]: Authenticate,
+  [ Authenticated.CODE ]: Authenticated,
+  [ NotAuthenticated.CODE ]: NotAuthenticated,
   [ BadRequest.CODE ]: BadRequest,
   [ DeleteStream.CODE ]: DeleteStream,
   [ DeleteStreamCompleted.CODE ]: DeleteStreamCompleted,
@@ -118,6 +127,9 @@ const makeCommandFromMessage = (Namespace: CommandNamespace, message?: any, corr
   return makeCommandFromParams(Namespace, params, correlationId);
 };
 
+export function getCommand(id: Authenticate.CODE, params?: any, correlationId?: string): Authenticate.Command;
+export function getCommand(id: Authenticated.CODE, params?: any, correlationId?: string): Authenticated.Command;
+export function getCommand(id: NotAuthenticated.CODE, params?: any, correlationId?: string): NotAuthenticated.Command;
 export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
 export function getCommand(id: DeleteStream.CODE, params: Buffer | DeleteStream.Params, correlationId?: string): DeleteStream.Command;
 export function getCommand(id: DeleteStreamCompleted.CODE, params: Buffer | DeleteStreamCompleted.Params, correlationId?: string): DeleteStreamCompleted.Command;
