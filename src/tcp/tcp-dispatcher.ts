@@ -23,6 +23,7 @@ export class TCPDispatcher {
   public async dispatch(command: Commands.ReadEvent.Command): Promise<Commands.ReadEventCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
   public async dispatch(command: Commands.ReadStreamEventsBackward.Command): Promise<Commands.ReadStreamEventsBackwardCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
   public async dispatch(command: Commands.ReadStreamEventsForward.Command): Promise<Commands.ReadStreamEventsForwardCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
+  public async dispatch(command: Commands.ScavengeDatabase.Command): Promise<Commands.ScavengeDatabaseCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
   public async dispatch(command: Commands.SubscribeToStream.Command): Promise<Commands.SubscriptionConfirmation.Command | Commands.SubscriptionDropped.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
   public async dispatch(command: Commands.TransactionCommit.Command): Promise<Commands.TransactionCommitCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
   public async dispatch(command: Commands.TransactionStart.Command): Promise<Commands.TransactionStartCompleted.Command | Commands.NotHandled.Command | Commands.NotAuthenticated.Command>;
