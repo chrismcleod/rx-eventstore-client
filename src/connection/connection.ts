@@ -71,6 +71,11 @@ export class Connection {
     return this._dispatcher.dispatch(command);
   }
 
+  public async readEvent(params: Commands.ReadEvent.Params) {
+    const command = Commands.getCommand(Commands.ReadEvent.CODE, params);
+    return this._dispatcher.dispatch(command);
+  }
+
   public async startTransaction(params: Commands.TransactionStart.Params) {
     const command = Commands.getCommand(Commands.TransactionStart.CODE, params);
     const result = await this._dispatcher.dispatch(command);

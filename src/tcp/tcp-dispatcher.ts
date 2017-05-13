@@ -21,6 +21,7 @@ export class TCPDispatcher {
   public async dispatch(command: Commands.ReadStreamEventsForward.Command): Promise<Commands.ReadStreamEventsForwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsBackward.Command): Promise<Commands.ReadAllEventsBackwardCompleted.Command>;
   public async dispatch(command: Commands.ReadAllEventsForward.Command): Promise<Commands.ReadAllEventsForwardCompleted.Command>;
+  public async dispatch(command: Commands.ReadEvent.Command): Promise<Commands.ReadEventCompleted.Command>;
   public async dispatch(command: Commands.SubscribeToStream.Command): Promise<Commands.SubscriptionConfirmation.Command | Commands.SubscriptionDropped.Command>;
   public async dispatch(command: Commands.TransactionCommit.Command): Promise<Commands.TransactionCommitCompleted.Command>;
   public async dispatch(command: Commands.TransactionStart.Command): Promise<Commands.TransactionStartCompleted.Command>;
