@@ -5,6 +5,7 @@ import * as DeleteStream from "./delete-stream";
 import * as DeleteStreamCompleted from "./delete-stream-completed";
 import * as Heartbeat from "./heartbeat";
 import * as NotAuthenticated from "./not-authenticated";
+import * as NotHandled from "./not-handled";
 import * as ReadAllEventsBackward from "./read-all-events-backward";
 import * as ReadAllEventsBackwardCompleted from "./read-all-events-backward-completed";
 import * as ReadAllEventsForward from "./read-all-events-forward";
@@ -40,6 +41,7 @@ export {
   DeleteStream,
   DeleteStreamCompleted,
   Heartbeat,
+  NotHandled,
   ReadAllEventsBackward,
   ReadAllEventsBackwardCompleted,
   ReadAllEventsForward,
@@ -78,6 +80,7 @@ export const CodeToNamespace = {
   [ BadRequest.CODE ]: BadRequest,
   [ DeleteStream.CODE ]: DeleteStream,
   [ DeleteStreamCompleted.CODE ]: DeleteStreamCompleted,
+  [ NotHandled.CODE ]: NotHandled,
   [ ReadAllEventsForward.CODE ]: ReadAllEventsForward,
   [ ReadAllEventsForwardCompleted.CODE ]: ReadAllEventsForwardCompleted,
   [ ReadAllEventsBackward.CODE ]: ReadAllEventsBackward,
@@ -133,6 +136,7 @@ export function getCommand(id: NotAuthenticated.CODE, params?: any, correlationI
 export function getCommand(id: BadRequest.CODE, params?: any, correlationId?: string): BadRequest.Command;
 export function getCommand(id: DeleteStream.CODE, params: Buffer | DeleteStream.Params, correlationId?: string): DeleteStream.Command;
 export function getCommand(id: DeleteStreamCompleted.CODE, params: Buffer | DeleteStreamCompleted.Params, correlationId?: string): DeleteStreamCompleted.Command;
+export function getCommand(id: NotHandled.CODE, params: Buffer | NotHandled.Params, correlationId?: string): NotHandled.Command;
 export function getCommand(id: ReadAllEventsBackward.CODE, params: Buffer | ReadAllEventsBackward.Params, correlationId?: string): ReadAllEventsBackward.Command;
 export function getCommand(id: ReadAllEventsBackwardCompleted.CODE, params: Buffer | ReadAllEventsBackwardCompleted.Params, correlationId?: string): ReadAllEventsBackwardCompleted.Command;
 export function getCommand(id: ReadAllEventsForward.CODE, params: Buffer | ReadAllEventsForward.Params, correlationId?: string): ReadAllEventsForward.Command;
