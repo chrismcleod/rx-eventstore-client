@@ -71,6 +71,8 @@ process.nextTick(async () => {
     transactionId: txid
   });
 
+  connection.rollbackTransaction(txid);
+
   console.log(writeResult1, writeResult2, writeResult3);
 
   const commitResult = await connection.commitTransaction({

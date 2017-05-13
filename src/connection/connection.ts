@@ -1,12 +1,12 @@
 import * as Commands from "../command";
 import * as Subscription from "../subscription";
+import * as Transaction from "./../transaction/manager";
 import * as _ from "lodash";
 
 import { Socket, connect } from "net";
 
 import { Credentials } from "../authentication";
 import { EventStoreSocketStream } from "./event-store-socket-stream";
-import { Params } from "./../command/read-all-events/index";
 import { TCPDispatcher } from "../tcp/tcp-dispatcher";
 
 interface Options {
@@ -33,6 +33,7 @@ export class Connection {
   private _currentReconnectionAttempts: number;
   private _options: Options;
   private _subscriptionManager: Subscription.Manager;
+  private _transactionManager: Transaction.Manager;
 
   constructor(options?: Options) {
     options = options || {};
@@ -41,6 +42,7 @@ export class Connection {
     this._handleIncomingCommand = this._handleIncomingCommand.bind(this);
     this._currentReconnectionAttempts = 0;
     this._subscriptionManager = new Subscription.Manager();
+    this._transactionManager = new Transaction.Manager();
     this._connect();
   }
 
@@ -71,17 +73,31 @@ export class Connection {
 
   public async startTransaction(params: Commands.TransactionStart.Params) {
     const command = Commands.getCommand(Commands.TransactionStart.CODE, params);
-    return this._dispatcher.dispatch(command);
+    const result = await this._dispatcher.dispatch(command);
+    if (result.message.result === 0) this._transactionManager.addTransaction(new Transaction.Transaction(result.message.transactionId));
+    return result;
   }
 
   public async continueTransaction(params: Commands.TransactionWrite.Params) {
-    const command = Commands.getCommand(Commands.TransactionWrite.CODE, params);
-    return this._dispatcher.dispatch(command);
+    if (this._transactionManager.transactionIsWritable(params.transactionId)) {
+      const command = Commands.getCommand(Commands.TransactionWrite.CODE, params);
+      return this._dispatcher.dispatch(command);
+    }
+    return false;
   }
 
   public async commitTransaction(params: Commands.TransactionCommit.Params) {
-    const command = Commands.getCommand(Commands.TransactionCommit.CODE, params);
-    return this._dispatcher.dispatch(command);
+    if (this._transactionManager.canCommitTransaction(params.transactionId)) {
+      const command = Commands.getCommand(Commands.TransactionCommit.CODE, params);
+      const result = await this._dispatcher.dispatch(command);
+      if (result.message.result === 0) this._transactionManager.commitTransaction(params.transactionId);
+      return result;
+    }
+    return false;
+  }
+
+  public async rollbackTransaction(transactionId: number | Long) {
+    return this._transactionManager.rollbackTransaction(transactionId);
   }
 
   public async subscribeToStream(params: Commands.SubscribeToStream.Params, observer?: Subscription.Observer) {
