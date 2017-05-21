@@ -395,6 +395,11 @@ class Connection {
     this.write$.next({ id, code: CODES.PersistentSubscriptionNakEvents, message: new EventStore.PersistentSubscriptionNakEvents(events) });
   }
 
+  public readEvent(params: EventStore.ReadEvent$Properties, id = v4()) {
+    this.write$.next({ id, code: CODES.ReadEvent, message: new EventStore.ReadEvent(params) });
+    return filterPacketStream(this.packet$, CODES.ReadEventCompleted).filter((command) => command.id === id);
+  }
+
   private _init() {
     let heartCounter = 0;
     const hearts = [ "❤️".red, "❤️".green, "❤️".yellow, "❤️".blue, "❤️".magenta, "❤️".cyan ];

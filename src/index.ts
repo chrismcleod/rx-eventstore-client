@@ -39,11 +39,18 @@ const $ = connection({ host: "192.168.99.100", port: 1113, credentials: { userna
 //   resolveLinkTos: true
 // }).subscribe((event) => console.log(event), console.log, () => console.log("completez"));
 
-$.connectToPersistentSubscription({
+// $.connectToPersistentSubscription({
+//   eventStreamId: "$ce-user",
+//   subscriptionId: "users",
+//   allowedInFlightMessages: 100
+// }).subscribe((command) => {
+//   console.log(command);
+//   $.ack("$ce-user::users", command.message.event, command.id);
+// }, console.log, () => console.log("completez"));
+
+$.readEvent({
   eventStreamId: "$ce-user",
-  subscriptionId: "users",
-  allowedInFlightMessages: 100
-}).subscribe((command) => {
-  console.log(command);
-  $.ack("$ce-user::users", command.message.event, command.id);
-}, console.log, () => console.log("completez"));
+  eventNumber: 117,
+  resolveLinkTos: true,
+  requireMaster: false
+}).subscribe(console.log);
