@@ -400,6 +400,21 @@ class Connection {
     return filterPacketStream(this.packet$, CODES.ReadEventCompleted).filter((command) => command.id === id);
   }
 
+  public startTransaction(params: EventStore.TransactionStart$Properties, id = v4()) {
+    this.write$.next({ id, code: CODES.TransactionStart, message: new EventStore.TransactionStart(params) });
+    return filterPacketStream(this.packet$, CODES.TransactionStartCompleted).filter((command) => command.id === id);
+  }
+
+  public continueTransaction(params: EventStore.TransactionWrite$Properties, id = v4()) {
+    this.write$.next({ id, code: CODES.TransactionWrite, message: new EventStore.TransactionWrite(params) });
+    return filterPacketStream(this.packet$, CODES.TransactionWriteCompleted).filter((command) => command.id === id);
+  }
+
+  public commitTransaction(params: EventStore.TransactionCommit$Properties, id = v4()) {
+    this.write$.next({ id, code: CODES.TransactionCommit, message: new EventStore.TransactionCommit(params) });
+    return filterPacketStream(this.packet$, CODES.TransactionCommitCompleted).filter((command) => command.id === id);
+  }
+
   private _init() {
     let heartCounter = 0;
     const hearts = [ "❤️".red, "❤️".green, "❤️".yellow, "❤️".blue, "❤️".magenta, "❤️".cyan ];
