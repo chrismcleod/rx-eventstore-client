@@ -1,9 +1,18 @@
 {
+  "name": "rx-eventstore",
+  "version": "0.0.1-alpha.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrismcleod/eventstore"
+  },
+  "license": "BSD-2-Clause",
   "dependencies": {
     "colors": "^1.1.2",
+    "esproto": "0.0.1-alpha.1",
     "long": "^3.2.0",
     "protobufjs": "^6.7.3",
-    "ramda": "^0.23.0",
     "rxjs": "^5.4.0",
     "uuid": "^3.0.1",
     "uuid-parse": "^1.0.0"
