@@ -1,35 +1,26 @@
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "node2",
-            "request": "launch",
-            "args": [],
-            "cwd": "${workspaceRoot}",
-            "preLaunchTask": null,
-            "runtimeExecutable": null,
-            "env": {
-                "NODE_ENV": "development"
-            },
-            "sourceMaps": true,
-            "name": "Launch Program",
-            "program": "${workspaceRoot}/src/index.ts",
-            "outFiles": [
-                "${workspaceRoot}/dist/index.js",
-                "${workspaceRoot}/dist/*.js",
-                "${workspaceRoot}/dist/*/**.js"
-            ]
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach to Port",
-            "address": "localhost",
-            "port": 5858,
-            "outFiles": []
-        }
-    ]
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceRoot}",
+      "preLaunchTask": null,
+      "runtimeExecutable": null,
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "sourceMaps": true,
+      "protocol": "inspector",
+      "name": "Launch Program",
+      "program": "${workspaceRoot}/src/index.ts",
+      "outFiles": [
+        "${workspaceRoot}/dist/**/*.js"
+      ]
+    }
+  ]
 }
