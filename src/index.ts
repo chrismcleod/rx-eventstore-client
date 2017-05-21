@@ -56,28 +56,34 @@ const $ = connection({ host: "192.168.99.100", port: 1113, credentials: { userna
 //   requireMaster: false
 // }).subscribe(console.log);
 
-$.startTransaction({
+// $.startTransaction({
+//   eventStreamId: "user-test",
+//   expectedVersion: -2,
+//   requireMaster: false
+// }).switchMap((command) => {
+//   const transactionId = command.message.transactionId;
+//   const events = [ {
+//     eventId: Buffer.from(parse(v4())),
+//     eventType: "CreateUser",
+//     dataContentType: 1,
+//     metadataContentType: 1,
+//     data: Buffer.from(JSON.stringify({ a: "b" })),
+//     metadata: Buffer.from("{}")
+//   }];
+//   return $.continueTransaction({
+//     events,
+//     transactionId,
+//     requireMaster: false
+//   }).switchMap((command) => {
+//     return $.commitTransaction({
+//       transactionId,
+//       requireMaster: false
+//     });
+//   });
+// }).subscribe(console.log);
+
+$.deleteStream({
   eventStreamId: "user-test",
   expectedVersion: -2,
   requireMaster: false
-}).switchMap((command) => {
-  const transactionId = command.message.transactionId;
-  const events = [ {
-    eventId: Buffer.from(parse(v4())),
-    eventType: "CreateUser",
-    dataContentType: 1,
-    metadataContentType: 1,
-    data: Buffer.from(JSON.stringify({ a: "b" })),
-    metadata: Buffer.from("{}")
-  }];
-  return $.continueTransaction({
-    events,
-    transactionId,
-    requireMaster: false
-  }).switchMap((command) => {
-    return $.commitTransaction({
-      transactionId,
-      requireMaster: false
-    });
-  });
 }).subscribe(console.log);

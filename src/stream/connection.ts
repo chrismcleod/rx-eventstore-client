@@ -415,6 +415,11 @@ class Connection {
     return filterPacketStream(this.packet$, CODES.TransactionCommitCompleted).filter((command) => command.id === id);
   }
 
+  public deleteStream(params: EventStore.DeleteStream$Properties, id = v4()) {
+    this.write$.next({ id, code: CODES.DeleteStream, message: new EventStore.DeleteStream(params) });
+    return filterPacketStream(this.packet$, CODES.DeleteStreamCompleted).filter((command) => command.id === id);
+  }
+
   private _init() {
     let heartCounter = 0;
     const hearts = [ "❤️".red, "❤️".green, "❤️".yellow, "❤️".blue, "❤️".magenta, "❤️".cyan ];
