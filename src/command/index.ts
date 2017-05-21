@@ -1,8 +1,8 @@
 import { COMMAND_OFFSET, CORRELATION_ID_OFFSET, DATA_OFFSET, FLAGS_OFFSET, GUID_LENGTH, HEADER_LENGTH, UINT32_LENGTH } from "../constants";
-import { Message, MetaMessage } from "protobufjs";
 import { parse, unparse } from "uuid-parse";
 
 import EventStore from "../eventstore";
+import { Message } from "protobufjs";
 import { getMessage } from "./codes";
 import { v4 } from "uuid";
 
