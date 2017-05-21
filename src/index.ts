@@ -1,129 +1,101 @@
-import "long";
-
+import * as Long from "long";
 import * as Rx from "rxjs";
-import * as faker from "faker";
 
-import { Connection } from "./connection/connection";
-import { ExpectedVersion } from "./event";
+import { CODES } from "./command/codes";
+import EventStore from "./eventstore";
+import { connection } from "./stream";
 import { parse } from "uuid-parse";
 import { v4 } from "uuid";
 
-// tslint:disable-next-line:no-namespace
-declare global {
-  export type UUID = string;
-  interface ResolverRejector<T> {
-    resolve: (value?: T | PromiseLike<T>) => void;
-    reject: (reason?: any) => void;
-  }
-}
+const $ = connection({ host: "192.168.99.100", port: 1113, credentials: { username: "admin", password: "changeit" } });
 
-const data = [];
-for (let i = 0; i < 500; ++i) {
-  data.push(faker.helpers.userCard());
-}
-
-const eventData = data.map((e) => ({
-  data: Buffer.from(JSON.stringify(e)),
-  dataContentType: 1,
-  eventId: parse(v4()) as any as Buffer,
-  eventType: "CreateUser",
-  metadata: Buffer.alloc(0),
-  metadataContentType: 1
-}));
-
-// process.nextTick(async () => {
-//   for (const event of eventData) {
-//     await connection.writeEvents({
-//       eventStreamId: `user-${v4()}`,
-//       events: [ event ],
-//       expectedVersion: ExpectedVersion.Any,
-//       requireMaster: false
-//     });
-//   }
-// });
-
-const connection = new Connection({ host: "192.168.99.100", credentials: { username: "admin", password: "changeit" } });
-process.nextTick(async () => {
-
-  const result = await connection.scavengeDatabase();
-  console.log(result);
-
-  // await connection.subscribeToAll(new Rx.Subscriber((command) => {
-  //   console.log("handler 1", command);
-  // }));
-
-  // await connection.subscribeToStream({ eventStreamId: "$ce-user", resolveLinkTos: true }, new Rx.Subscriber((command) => {
-  //   console.log("handler 2", command);
-  // }));
-
-  // const result = await connection.authenticate();
-  // console.log(result);
-
-  // const result = await connection.readEvent({ eventStreamId: "$ce-user", eventNumber: 0, resolveLinkTos: true, requireMaster: false });
-  // console.log(result);
-
-  // const deleteResult = await connection.deleteStream({ eventStreamId: result.message.event.event!.eventStreamId, expectedVersion: ExpectedVersion.Any, requireMaster: false, hardDelete: true });
-  // console.log(deleteResult);
-
-  // const result = await connection.startTransaction({
-  //   eventStreamId: `user-${v4()}`,
-  //   expectedVersion: ExpectedVersion.Any,
-  //   requireMaster: false
-  // });
-
-  // const txid = result.message.transactionId;
-
-  // const writeResult1 = await connection.continueTransaction({
-  //   events: [ eventData[ 0 ] ],
-  //   requireMaster: false,
-  //   transactionId: txid
-  // });
-
-  // const writeResult2 = await connection.continueTransaction({
-  //   events: [ eventData[ 1 ] ],
-  //   requireMaster: false,
-  //   transactionId: txid
-  // });
-
-  // const writeResult3 = await connection.continueTransaction({
-  //   events: [ eventData[ 2 ] ],
-  //   requireMaster: false,
-  //   transactionId: txid
-  // });
-
-  // connection.rollbackTransaction(txid);
-
-  // console.log(writeResult1, writeResult2, writeResult3);
-
-  // const commitResult = await connection.commitTransaction({
-  //   requireMaster: false,
-  //   transactionId: txid
-  // });
-
-  // console.log(commitResult);
-
-  // await connection.subscribeToStream({
-  //   eventStreamId: "$ce-user",
-  //   resolveLinkTos: true
-  // }, new Rx.Subscriber((command) => {
-  //   console.log("handler 3", command.key);
-  // }));
-
-});
-
-// let cursor = 0;
 // setInterval(() => {
-//   console.log("Creating user...");
-//   connection.writeEvents({
+//   $.writeEvents({
 //     eventStreamId: `user-${v4()}`,
-//     events: [ eventData[ cursor++ ] ],
-//     expectedVersion: ExpectedVersion.Any,
+//     expectedVersion: -2,
+//     events: [ {
+//       eventId: Buffer.from(parse(v4())),
+//       eventType: "CreateUser",
+//       dataContentType: 1,
+//       metadataContentType: 1,
+//       data: Buffer.from(JSON.stringify({ a: "b" })),
+//       metadata: Buffer.from("{}")
+//     }],
 //     requireMaster: false
-//   });
+//   }).subscribe((e) => console.log(e));
 // }, 1000);
 
-// setTimeout(() => {
-//   console.log("dropping");
-//   const command = getCommand(SubscriptionDropped.CODE, { reason: 0 }, sid);
-//   connection._$._util$.next(command);
-// }, 2000);
+// $.subscribeToAllFrom({
+//   commitPosition: Long.fromBits(16978866, 0),
+//   preparePosition: 0,
+//   maxCount: 100,
+//   requireMaster: false,
+//   resolveLinkTos: true
+// }).subscribe((event) => console.log(event), console.log, () => console.log("completez"));
+
+// $.subscribeToStreamFrom({
+//   eventStreamId: "$ce-user",
+//   fromEventNumber: 0,
+//   maxCount: 100,
+//   requireMaster: false,
+//   resolveLinkTos: true
+// }).subscribe((event) => console.log(event), console.log, () => console.log("completez"));
+
+// $.connectToPersistentSubscription({
+//   eventStreamId: "$ce-user",
+//   subscriptionId: "users",
+//   allowedInFlightMessages: 100
+// }).subscribe((command) => {
+//   console.log(command);
+//   $.ack("$ce-user::users", command.message.event, command.id);
+// }, console.log, () => console.log("completez"));
+
+// $.readEvent({
+//   eventStreamId: "$ce-user",
+//   eventNumber: 117,
+//   resolveLinkTos: true,
+//   requireMaster: false
+// }).subscribe(console.log);
+
+// $.startTransaction({
+//   eventStreamId: "user-test",
+//   expectedVersion: -2,
+//   requireMaster: false
+// }).switchMap((command) => {
+//   const transactionId = command.message.transactionId;
+//   const events = [ {
+//     eventId: Buffer.from(parse(v4())),
+//     eventType: "CreateUser",
+//     dataContentType: 1,
+//     metadataContentType: 1,
+//     data: Buffer.from(JSON.stringify({ a: "b" })),
+//     metadata: Buffer.from("{}")
+//   }];
+//   return $.continueTransaction({
+//     events,
+//     transactionId,
+//     requireMaster: false
+//   }).switchMap((command) => {
+//     return $.commitTransaction({
+//       transactionId,
+//       requireMaster: false
+//     });
+//   });
+// }).subscribe(console.log);
+
+// $.deleteStream({
+//   eventStreamId: "user-test",
+//   expectedVersion: -2,
+//   requireMaster: false
+// }).subscribe(console.log);
+
+Rx.Observable.interval(1000).subscribe((i) => console.log(i, "seconds"));
+
+setTimeout(() => {
+  $.readEvent({
+    eventStreamId: "$ce-user",
+    eventNumber: 100,
+    resolveLinkTos: true,
+    requireMaster: false
+  }).subscribe(console.log);
+}, 10000)
