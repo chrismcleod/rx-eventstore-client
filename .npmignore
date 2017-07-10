@@ -8,3 +8,5 @@ tsconfig.json
 node_modules
 dist/example.js
 dist/example.d.ts
+specs
+coverage

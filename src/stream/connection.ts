@@ -1,4 +1,5 @@
 import "colors";
+import "rxjs-extra/add/operator/takeWhileInclusive";
 
 import * as Long from "long";
 
@@ -109,39 +110,42 @@ const withTimeout = <T>(obs: Observable<T>, call?: CallbackFunctionVariadic, tim
 export class Connection {
 
   public readonly options: ConnectionOptions;
-  private _socket: Socket;
-  private _close$: Observable<boolean>;
-  private _connect$: Observable<void>;
-  private _data$: Observable<Buffer>;
-  private _drain$: Observable<void>;
-  private _end$: Observable<void>;
-  private _error$: Observable<Error>;
-  private _lookup$: Observable<LookupResult>;
-  private _timeout$: Observable<void>;
-  private _extra$: Subject<Buffer>;
-  private _write$: Subject<Command<any>>;
-  private _packet$: Observable<{ packet: Buffer, extra: Buffer, code: number }>;
-  private _heartbeat$: Observable<Command<{}>>;
-  private _writeEventsCompleted$: Observable<Command<EventStore.WriteEventsCompleted>>;
-  private _readStreamEventsForwardCompleted$: Observable<Command<EventStore.ReadStreamEventsCompleted>>;
-  private _readStreamEventsBackwardCompleted$: Observable<Command<EventStore.ReadStreamEventsCompleted>>;
-  private _readAllEventsForwardCompleted$: Observable<Command<EventStore.ReadAllEventsCompleted>>;
-  private _readAllEventsBackwardCompleted$: Observable<Command<EventStore.ReadAllEventsCompleted>>;
-  private _subscriptionConfirmation$: Observable<Command<EventStore.SubscriptionConfirmation>>;
-  private _subscriptionDropped$: Observable<Command<EventStore.SubscriptionDropped>>;
-  private _streamEventAppeared$: Observable<Command<EventStore.StreamEventAppeared>>;
-  private _persistentSubscriptionStreamEventAppeared$: Observable<Command<EventStore.PersistentSubscriptionStreamEventAppeared>>;
-  private _persistentSubscriptionConfirmation$: Observable<Command<EventStore.PersistentSubscriptionConfirmation>>;
-  private _reconnecting: boolean = false;
+  private _socket?: Socket;
+  private _close$?: Observable<boolean>;
+  private _connect$?: Observable<void>;
+  private _data$?: Observable<Buffer>;
+  private _drain$?: Observable<void>;
+  private _end$?: Observable<void>;
+  private _error$?: Observable<Error>;
+  private _lookup$?: Observable<LookupResult>;
+  private _timeout$?: Observable<void>;
+  private _extra$?: Subject<Buffer>;
+  private _write$?: Subject<Command<any>>;
+  private _packet$?: Observable<{ packet: Buffer, extra: Buffer, code: number }>;
+  private _heartbeat$?: Observable<Command<{}>>;
+  private _pong$?: Observable<Command<void>>;
+  private _writeEventsCompleted$?: Observable<Command<EventStore.WriteEventsCompleted>>;
+  private _readStreamEventsForwardCompleted$?: Observable<Command<EventStore.ReadStreamEventsCompleted>>;
+  private _readStreamEventsBackwardCompleted$?: Observable<Command<EventStore.ReadStreamEventsCompleted>>;
+  private _readAllEventsForwardCompleted$?: Observable<Command<EventStore.ReadAllEventsCompleted>>;
+  private _readAllEventsBackwardCompleted$?: Observable<Command<EventStore.ReadAllEventsCompleted>>;
+  private _subscriptionConfirmation$?: Observable<Command<EventStore.SubscriptionConfirmation>>;
+  private _subscriptionDropped$?: Observable<Command<EventStore.SubscriptionDropped>>;
+  private _streamEventAppeared$?: Observable<Command<EventStore.StreamEventAppeared>>;
+  private _persistentSubscriptionStreamEventAppeared$?: Observable<Command<EventStore.PersistentSubscriptionStreamEventAppeared>>;
+  private _persistentSubscriptionConfirmation$?: Observable<Command<EventStore.PersistentSubscriptionConfirmation>>;
+  private _reconnecting?: boolean = false;
 
   constructor(options: ConnectionOptions) {
+    this._reconnectionHandler = this._reconnectionHandler.bind(this);
     this.options = { ...defaultConnectionOptions, ...options };
-    this._socket = connect({ host: options.host, port: options.port });
-    this._init();
+    this.connect();
+    this.packet$.subscribe((packet) => console.log(CODES[ packet.code ]));
   }
 
   public get socket() {
-    return this._socket;
+    if (!this._socket) this.connect();
+    return this._socket!;
   }
 
   public get close$() {
@@ -205,6 +209,10 @@ export class Connection {
     return this._heartbeat$ || (this._heartbeat$ = filterPacketStream(this.packet$, CODES.HeartbeatRequestCommand));
   }
 
+  public get pong$() {
+    return this._pong$ || (this._pong$ = filterPacketStream(this.packet$, CODES.Pong));
+  }
+
   public get writeEventsCompleted$() {
     return this._writeEventsCompleted$ || (this._writeEventsCompleted$ = filterPacketStream(this.packet$, CODES.WriteEventsCompleted));
   }
@@ -245,9 +253,50 @@ export class Connection {
     return this._persistentSubscriptionConfirmation$ || (this._persistentSubscriptionConfirmation$ = filterPacketStream(this.packet$, CODES.PersistentSubscriptionConfirmation));
   }
 
+  public connect() {
+    this._socket = connect({ host: this.options.host, port: this.options.port });
+    this._init();
+  }
+
+  public close() {
+    this.socket.removeListener("close", this._reconnectionHandler);
+    this.socket.destroy();
+    this._socket = undefined;
+    this._close$ = undefined;
+    this._connect$ = undefined;
+    this._data$ = undefined;
+    this._drain$ = undefined;
+    this._end$ = undefined;
+    this._error$ = undefined;
+    this._lookup$ = undefined;
+    this._timeout$ = undefined;
+    this._extra$ = undefined;
+    this._write$ = undefined;
+    this._packet$ = undefined;
+    this._heartbeat$ = undefined;
+    this._pong$ = undefined;
+    this._writeEventsCompleted$ = undefined;
+    this._readStreamEventsForwardCompleted$ = undefined;
+    this._readStreamEventsBackwardCompleted$ = undefined;
+    this._readAllEventsForwardCompleted$ = undefined;
+    this._readAllEventsBackwardCompleted$ = undefined;
+    this._subscriptionConfirmation$ = undefined;
+    this._subscriptionDropped$ = undefined;
+    this._streamEventAppeared$ = undefined;
+    this._persistentSubscriptionStreamEventAppeared$ = undefined;
+    this._persistentSubscriptionConfirmation$ = undefined;
+    this._reconnecting = undefined;
+  }
+
+  public ping() {
+    const id = v4();
+    this.socket.write(commandToBuffer({ id, code: CODES.Ping }, this.options.credentials));
+    return this.pong$.first((command) => command.id === id);
+  }
+
   public writeEvents(params: EventStore.WriteEvents$Properties, id: string = v4()) {
     this.write$.next({ id, code: CODES.WriteEvents, message: new EventStore.WriteEvents(params) });
-    return this.writeEventsCompleted$.first((command) => command.id === id);
+    return this.writeEventsCompleted$.first((command) => command.id === id).share();
   }
 
   public readStreamEventsForward(params: EventStore.ReadStreamEvents$Properties, id: string = v4()) {
@@ -291,6 +340,11 @@ export class Connection {
     return this.streamEventAppeared$.filter((command) => command.id === id);
   }
 
+  public unsubscribeFromStream(id: string) {
+    this.write$.next({ id, code: CODES.UnsubscribeFromStream, message: new EventStore.UnsubscribeFromStream() });
+    return this.subscriptionDropped$.filter((command) => command.id === id);
+  }
+
   public subscribeToAll(params: Pick<EventStore.SubscribeToStream$Properties, "resolveLinkTos">, id: string = v4()) {
     return this.subscribeToStream({ ...params, eventStreamId: "" }, id);
   }
@@ -310,8 +364,7 @@ export class Connection {
       .concatMap((command) => {
         return Observable.from(command.message!.events).filter((event) => {
           if (event.link) return event.link.eventNumber <= toEventNumber;
-          if (event.event) return event.event.eventNumber <= toEventNumber;
-          return true;
+          return event.event.eventNumber <= toEventNumber;
         });
       })
   }
@@ -323,7 +376,7 @@ export class Connection {
         const nextParams = { ...params, commitPosition: command.message!.nextCommitPosition, preparePosition: command.message!.nextPreparePosition };
         return this.readAllEventsForward(nextParams);
       })
-      .takeWhile((command) => {
+      .takeWhileInclusive((command) => {
         const nextPosition = new ESPosition(command.message!.nextCommitPosition, command.message!.nextPreparePosition);
         const shouldTake = !done && nextPosition.lt(toPosition);
         done = command.message!.nextCommitPosition === -1 || command.message!.nextPreparePosition === -1;
@@ -335,31 +388,38 @@ export class Connection {
           const eventPosition = new ESPosition(event.commitPosition, event.preparePosition);
           return eventPosition.lte(toPosition);
         });
-      })
+      });
   }
 
   public subscribeToStreamFrom(params: EventStore.ReadStreamEvents$Properties, id: string = v4()) {
-    const catchupComplete = new Subject();
-    const subscription = this.subscribeToStream(params, id);
-    const stream1 = this.subscriptionConfirmation$
-      .first((command) => command.id === id)
-      .switchMap((command) => {
-        return this.readStreamEventsUntil(params, command.message!.lastEventNumber);
-      })
-      .share();
-    stream1.subscribe(undefined, undefined, () => catchupComplete.next() && catchupComplete.complete());
-    const stream2 = Observable.concat(
-      subscription
-        .buffer(catchupComplete)
-        .first()
-        .switchMap((bufferedStreamEventAppearedEvents) => {
-          return bufferedStreamEventAppearedEvents.length === 0
-            ? Observable.empty()
-            : Observable.from(bufferedStreamEventAppearedEvents).map((command) => command.message!.event);
-        }),
-      subscription.map((command) => command.message!.event)
-    );
-    return Observable.merge(stream1, stream2);
+
+    const stream1Completed = new Subject<boolean>();
+    const confirmed = this.subscriptionConfirmation$.first((command) => command.id === id);
+    const subscription = this.subscribeToStream({ eventStreamId: params.eventStreamId, resolveLinkTos: params.resolveLinkTos }, id).share();
+    const liveStream = subscription.map((command) => command.message!.event).publishReplay(100000);
+    const bufferedStream = subscription
+      .buffer(stream1Completed)
+      .take(1)
+      .switchMap((events) => {
+        return events.length === 0 ? Observable.empty() : Observable.from(events).map((command) => command.message!.event);
+      }).publishReplay(1);
+
+    bufferedStream.connect();
+    liveStream.connect();
+    const stream1 = confirmed.first().switchMap((command) => this.readStreamEventsUntil(params, command.message!.lastEventNumber)).share();
+    // const stream2 = Observable.of(bufferedStream, liveStream).concatAll().share();
+    stream1.subscribe(undefined, undefined, () => stream1Completed.next(true) && stream1Completed.complete());
+    const stream3 = Observable.concat(stream1, bufferedStream, liveStream).share();
+
+    subscription.subscribe((r) => console.log("subscription", r), console.log, () => console.log("subscription complete"));
+    confirmed.subscribe((r) => console.log("confirmed", r), console.log, () => console.log("confirmed complete"));
+    stream1Completed.subscribe((r) => console.log("catchupComplete", r), console.log, () => console.log("catchupComplete complete"));
+    bufferedStream.subscribe((r) => console.log("bufferedStream", r), console.log, () => console.log("buffered stream complete"));
+    stream1.subscribe((r) => console.log("stream1", r), console.log, () => console.log("stream1 complete"));
+    liveStream.subscribe((r) => console.log("liveStream", r), console.log, () => console.log("liveStream complete"));
+    //stream2.subscribe((r) => console.log("stream2", r), console.log, () => console.log("stream2 complete"));
+    stream3.subscribe((r) => console.log("stream3", r), console.log, () => console.log("stream3 complete"));
+    return stream3;
   }
 
   public subscribeToAllFrom(params: EventStore.ReadAllEvents$Properties, id: string = v4()) {
@@ -454,7 +514,7 @@ export class Connection {
       }
     });
 
-    this._socket.on("close", this._reconnectionHandler.bind(this));
+    this.socket.on("close", this._reconnectionHandler);
   }
 
   private _reconnectionHandler(hadError: boolean) {
@@ -474,14 +534,14 @@ export class Connection {
       const connectedHandler = () => {
         console.info(`Reconnected after ${reconnectionAttempts} attempt${reconnectionAttempts > 1 ? "s" : ""}`);
         this._reconnecting = false;
-        this._socket.removeListener("error", errorHandler);
+        this.socket.removeListener("error", errorHandler);
         clearInterval(interval);
       }
-      this._socket.on("error", errorHandler);
-      this._socket.once("connect", connectedHandler);
+      this.socket.on("error", errorHandler);
+      this.socket.once("connect", connectedHandler);
       const interval = setInterval(() => {
         reconnectionAttempts += 1;
-        this._socket.connect(this.options.port, this.options.host);
+        this.socket.connect(this.options.port, this.options.host);
       }, 5000);
     }
   }

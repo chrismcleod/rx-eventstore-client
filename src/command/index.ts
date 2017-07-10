@@ -6,6 +6,11 @@ import { Message } from "protobufjs";
 import { getMessage } from "./codes";
 import { v4 } from "uuid";
 
+export const ExpectedVersion = {
+  Any: -2,
+  NoStream: -1
+}
+
 export interface MessageEnum<T> {
   [ key: string ]: T;
 }
@@ -87,17 +92,17 @@ export const commandFromBuffer = (code: number, buffer: Buffer) => {
   const data = buffer.slice(DATA_OFFSET);
   const Message = getMessage(code);
   const message = Message ? Message.decode(data) : undefined;
-  return { code, message, id, encoded: buffer };
+  return { code, message, id, encoded: buffer } as Command<any>;
 };
 
 export const commandToBuffer = <T>(command: Command<T>, credentials?: Credentials): Buffer | void => {
+  const { id, code, message } = command;
+  const idBuffer = Buffer.alloc(16);
+  id ? parse(id, idBuffer, 0) : v4(null, idBuffer, 0);
   if (command.message) {
-    const { id, code, message } = command;
-    const idBuffer = Buffer.alloc(16);
-    id ? parse(id, idBuffer, 0) : v4(null, idBuffer, 0);
     const Message = getMessage(code);
     const messageBuffer = Message.encode(message).finish();
     return encode({ code, id: idBuffer, message: messageBuffer, credentials });
   }
-  return;
+  return encode({ code, id: idBuffer, credentials });
 }

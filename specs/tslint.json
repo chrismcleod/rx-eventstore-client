@@ -1,0 +1,28 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "max-line-length": [
+      400
+    ],
+    "object-literal-sort-keys": [
+      false
+    ],
+    "only-arrow-functions": [
+      false
+    ],
+    "ordered-imports": [
+      false
+    ],
+    "space-before-function-paren": [
+      true
+    ],
+    "trailing-comma": [
+      false
+    ]
+  },
+  "rulesDirectory": []
+}
