@@ -1,0 +1,14 @@
+{
+  "ignore": [
+    ".vscode",
+    "@types",
+    "coverage",
+    "dist"
+  ],
+  "test": [
+    "**/test/**"
+  ],
+  "critics": {
+    "lint": {"engine": "tslint"}
+  }
+}

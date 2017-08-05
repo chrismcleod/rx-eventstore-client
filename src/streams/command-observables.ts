@@ -1,0 +1,34 @@
+import * as eventstore from 'esproto';
+
+import { CommandObservableFactory, CommandObservableWithDataFactory } from '../core';
+
+export interface CommandObservables {
+  Authenticated: CommandObservableFactory<eventstore.IncomingCodes.Authenticated>;
+  BadRequest: CommandObservableFactory<eventstore.IncomingCodes.BadRequest>;
+  ClientIdentified: CommandObservableFactory<eventstore.IncomingCodes.ClientIdentified>;
+  CreatePersistentSubscriptionCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.CreatePersistentSubscriptionCompleted, eventstore.CreatePersistentSubscriptionCompleted$Properties>;
+  DataChunkBulk: CommandObservableFactory<eventstore.IncomingCodes.DataChunkBulk>;
+  DeletePersistentSubscriptionCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.DeletePersistentSubscriptionCompleted, eventstore.DeletePersistentSubscriptionCompleted$Properties>;
+  DeleteStreamCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.DeleteStreamCompleted, eventstore.DeleteStreamCompleted$Properties>;
+  HeartbeatRequestCommand: CommandObservableFactory<eventstore.IncomingCodes.HeartbeatRequestCommand>;
+  NotAuthenticated: CommandObservableFactory<eventstore.IncomingCodes.NotAuthenticated>;
+  NotHandled: CommandObservableWithDataFactory<eventstore.IncomingCodes.NotHandled, eventstore.NotHandled$Properties>;
+  PersistentSubscriptionConfirmation: CommandObservableWithDataFactory<eventstore.IncomingCodes.PersistentSubscriptionConfirmation, eventstore.PersistentSubscriptionConfirmation$Properties>;
+  PersistentSubscriptionStreamEventAppeared: CommandObservableWithDataFactory<eventstore.IncomingCodes.PersistentSubscriptionStreamEventAppeared, eventstore.PersistentSubscriptionStreamEventAppeared$Properties>;
+  Pong: CommandObservableFactory<eventstore.IncomingCodes.Pong>;
+  ReadAllEventsBackwardCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ReadAllEventsBackwardCompleted, eventstore.ReadAllEventsBackwardCompleted$Properties>;
+  ReadAllEventsForwardCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ReadAllEventsForwardCompleted, eventstore.ReadAllEventsForwardCompleted$Properties>;
+  ReadEventCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ReadEventCompleted, eventstore.ReadEventCompleted$Properties>;
+  ReadStreamEventsBackwardCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ReadStreamEventsBackwardCompleted, eventstore.ReadStreamEventsBackwardCompleted$Properties>;
+  ReadStreamEventsForwardCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ReadStreamEventsForwardCompleted, eventstore.ReadStreamEventsForwardCompleted$Properties>;
+  ReplicaSubscribed: CommandObservableFactory<eventstore.IncomingCodes.ReplicaSubscribed>;
+  ScavengeDatabaseCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.ScavengeDatabaseCompleted, eventstore.ScavengeDatabaseCompleted$Properties>;
+  StreamEventAppeared: CommandObservableWithDataFactory<eventstore.IncomingCodes.StreamEventAppeared, eventstore.StreamEventAppeared$Properties>;
+  SubscriptionConfirmation: CommandObservableWithDataFactory<eventstore.IncomingCodes.SubscriptionConfirmation, eventstore.SubscriptionConfirmation$Properties>;
+  SubscriptionDropped: CommandObservableWithDataFactory<eventstore.IncomingCodes.SubscriptionDropped, eventstore.SubscriptionDropped$Properties>;
+  TransactionCommitCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.TransactionCommitCompleted, eventstore.TransactionCommitCompleted$Properties>;
+  TransactionStartCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.TransactionStartCompleted, eventstore.TransactionStartCompleted$Properties>;
+  TransactionWriteCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.TransactionWriteCompleted, eventstore.TransactionWriteCompleted$Properties>;
+  UpdatePersistentSubscriptionCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.UpdatePersistentSubscriptionCompleted, eventstore.UpdatePersistentSubscriptionCompleted$Properties>;
+  WriteEventsCompleted: CommandObservableWithDataFactory<eventstore.IncomingCodes.WriteEventsCompleted, eventstore.WriteEventsCompleted$Properties>;
+}

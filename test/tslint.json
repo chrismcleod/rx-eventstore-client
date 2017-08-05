@@ -1,0 +1,87 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "rules": {
+    "class-name": true,
+    "comment-format": [
+      true,
+      "check-space"
+    ],
+    "curly": true,
+    "eofline": true,
+    "forin": true,
+    "indent": [
+      true,
+      "spaces"
+    ],
+    "interface-name": [
+      false
+    ],
+    "jsdoc-format": true,
+    "label-position": true,
+    "max-line-length": [
+      400
+    ],
+    "no-arg": true,
+    "no-conditional-assignment": true,
+    "no-construct": true,
+    "no-debugger": true,
+    "no-duplicate-variable": true,
+    "no-empty": true,
+    "no-inferrable-types": true,
+    "no-internal-module": true,
+    "no-shadowed-variable": true,
+    "no-switch-case-fall-through": true,
+    "no-trailing-whitespace": true,
+    "no-unused-expression": true,
+    "no-unused-variable": true,
+    "no-use-before-declare": true,
+    "no-var-keyword": true,
+    "object-literal-sort-keys": [
+      false
+    ],
+    "only-arrow-functions": [
+      false
+    ],
+    "ordered-imports": [
+      false
+    ],
+    "quotemark": [
+      true,
+      "single"
+    ],
+    "radix": true,
+    "semicolon": [
+      true,
+      "always"
+    ],
+    "space-before-function-paren": [
+      false
+    ],
+    "switch-default": true,
+    "trailing-comma": [
+      false
+    ],
+    "triple-equals": [
+      true,
+      "allow-null-check"
+    ],
+    "variable-name": [
+      true,
+      "allow-pascal-case",
+      "check-format",
+      "ban-keywords"
+    ],
+    "whitespace": [
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-module",
+      "check-type",
+      "check-typecast",
+      "check-preblock"
+    ]
+  }
+}

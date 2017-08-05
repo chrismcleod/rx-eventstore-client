@@ -1,0 +1,5 @@
+--compilers ts-node/register
+--require source-map-support/register
+--require ./test/globals.ts
+--recursive
+ ./test/support.ts test/**/*.spec.ts
