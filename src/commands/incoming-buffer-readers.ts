@@ -1,0 +1,34 @@
+import * as eventstore from 'esproto';
+
+import { IncomingBufferReader, IncomingBufferReaderWithMessage } from '../core';
+
+export interface IncomingBufferReaders {
+  Authenticated: IncomingBufferReader<eventstore.IncomingCodes.Authenticated>;
+  BadRequest: IncomingBufferReader<eventstore.IncomingCodes.BadRequest>;
+  ClientIdentified: IncomingBufferReader<eventstore.IncomingCodes.ClientIdentified>;
+  CreatePersistentSubscriptionCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.CreatePersistentSubscriptionCompleted, eventstore.CreatePersistentSubscriptionCompleted$Properties>;
+  DataChunkBulk: IncomingBufferReader<eventstore.IncomingCodes.DataChunkBulk>;
+  DeletePersistentSubscriptionCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.DeletePersistentSubscriptionCompleted, eventstore.DeletePersistentSubscriptionCompleted$Properties>;
+  DeleteStreamCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.DeleteStreamCompleted, eventstore.DeleteStreamCompleted$Properties>;
+  HeartbeatRequestCommand: IncomingBufferReader<eventstore.IncomingCodes.HeartbeatRequestCommand>;
+  NotAuthenticated: IncomingBufferReader<eventstore.IncomingCodes.NotAuthenticated>;
+  NotHandled: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.NotHandled, eventstore.NotHandled$Properties>;
+  PersistentSubscriptionConfirmation: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.PersistentSubscriptionConfirmation, eventstore.PersistentSubscriptionConfirmation$Properties>;
+  PersistentSubscriptionStreamEventAppeared: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.PersistentSubscriptionStreamEventAppeared, eventstore.PersistentSubscriptionStreamEventAppeared$Properties>;
+  Pong: IncomingBufferReader<eventstore.IncomingCodes.Pong>;
+  ReadAllEventsBackwardCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ReadAllEventsBackwardCompleted, eventstore.ReadAllEventsBackwardCompleted$Properties>;
+  ReadAllEventsForwardCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ReadAllEventsForwardCompleted, eventstore.ReadAllEventsForwardCompleted$Properties>;
+  ReadEventCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ReadEventCompleted, eventstore.ReadEventCompleted$Properties>;
+  ReadStreamEventsBackwardCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ReadStreamEventsBackwardCompleted, eventstore.ReadStreamEventsBackwardCompleted$Properties>;
+  ReadStreamEventsForwardCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ReadStreamEventsForwardCompleted, eventstore.ReadStreamEventsForwardCompleted$Properties>;
+  ReplicaSubscribed: IncomingBufferReader<eventstore.IncomingCodes.ReplicaSubscribed>;
+  ScavengeDatabaseCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.ScavengeDatabaseCompleted, eventstore.ScavengeDatabaseCompleted$Properties>;
+  StreamEventAppeared: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.StreamEventAppeared, eventstore.StreamEventAppeared$Properties>;
+  SubscriptionConfirmation: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.SubscriptionConfirmation, eventstore.SubscriptionConfirmation$Properties>;
+  SubscriptionDropped: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.SubscriptionDropped, eventstore.SubscriptionDropped$Properties>;
+  TransactionCommitCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.TransactionCommitCompleted, eventstore.TransactionCommitCompleted$Properties>;
+  TransactionStartCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.TransactionStartCompleted, eventstore.TransactionStartCompleted$Properties>;
+  TransactionWriteCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.TransactionWriteCompleted, eventstore.TransactionWriteCompleted$Properties>;
+  UpdatePersistentSubscriptionCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.UpdatePersistentSubscriptionCompleted, eventstore.UpdatePersistentSubscriptionCompleted$Properties>;
+  WriteEventsCompleted: IncomingBufferReaderWithMessage<eventstore.IncomingCodes.WriteEventsCompleted, eventstore.WriteEventsCompleted$Properties>;
+}

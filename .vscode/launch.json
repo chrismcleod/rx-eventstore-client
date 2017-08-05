@@ -1,0 +1,29 @@
+{
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "env": {
+        "TS_NODE_PROJECT": "./test"
+      },
+      "runtimeArgs": [
+        "${workspaceRoot}/node_modules/.bin/_mocha",
+        "./test/support.ts",
+        "./test/**/*.spec.ts"
+      ],
+      "stopOnEntry": false,
+      "sourceMaps": true,
+      "console": "integratedTerminal",
+      "outFiles": [
+        "${workspaceRoot}/test/**/*"
+      ]
+    }
+  ]
+}

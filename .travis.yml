@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+  - "node"
+before_script:
+  - npm i -g typescript
+  - tsc -p ./src || true
+scripts:
+  test: "yarn test"
