@@ -1,34 +1,44 @@
 # Rx EventStore Client
 
-[![Build Statme](https://travis-ci.org/chrismcleod/rx-eventstore-client.svg?branch=feature/refactor)](https://travis-ci.org/chrismcleod/rx-eventstore-client)
+[![Build Statme](https://travis-ci.org/chrismcleod/rx-eventstore-client.svg?branch=develop)](https://travis-ci.org/chrismcleod/rx-eventstore-client)
 [![Code Climate](https://img.shields.io/codeclimate/coverage/github/chrismcleod/rx-eventstore-client.svg)](https://codeclimate.com/github/chrismcleod/rx-eventstore-client/coverage?sort=covered_percent&sort_direction=desc)
 [![Code Climate](https://img.shields.io/codeclimate/github/chrismcleod/rx-eventstore-client.svg)](https://codeclimate.com/github/chrismcleod/rx-eventstore-client)
 [![bitHound](https://img.shields.io/bithound/dependencies/github/chrismcleod/rx-eventstore-client.svg)](https://www.bithound.io/github/chrismcleod/rx-eventstore-client)
 
 An [eventstore](http://geteventstore.com) client using rxjs 5 streams.
 
-## INSTALLATION
-**npm**
+## Installation
+
+using **[npm](https://travis-ci.org/chrismcleod/rx-eventstore-client)**
 
 ```bash
 npm i rx-eventstore-client
 ```
 
-**yarn**
+using **[yarn](https://yarnpkg.com/en/)**
 
 ```bash
 yarn add rx-eventstore-client
 ```
 
-## USAGE
+## Usage
 An example file is included, to run it:
 
+using **[npm](https://travis-ci.org/chrismcleod/rx-eventstore-client)**
+
 ```bash
-node node_modules/rx-eventstore-client/dist/example.js
+npm run example
 ```
 
-### EXAMPLE
+using **[yarn](https://yarnpkg.com/en/)**
+
+```bash
+yarn example
+```
+
+### Example
 ```typescript
+// tslint:disable
 import { Client } from './client';
 import { parse } from 'uuid-parse';
 import { v4 } from 'uuid';
@@ -50,10 +60,20 @@ const makeEvents = (count: number) => {
 
 const TEST_STREAM = 'rxeventstoreclienttests-tests-eb61d1f9-a0cc-4e96-ba35-d0160339898c';
 const TEST_SUBSCRIPTION = `rxeventstoreclienttests-tests-${v4()}`;
-const client = new Client({ host: '192.168.99.100', port: 1113, credentials: { username: 'admin', password: 'changeit' } });
+const client = new Client({
+  host: '192.168.99.100',
+  port: 1113,
+  credentials: { username: 'admin', password: 'changeit' },
+  reconnection: {
+    retries: 5,
+    strategy: 'log', // logarithmic backoff interval between reconnection attempts up to a max of 30 seconds
+    interval: 1000
+  }
+});
 
 client.connected$.subscribe(() => {
-
+  console.log('connected');
+  client.notHandled$.subscribe(() => console.log('not handled'))
   client.writeEvents({ eventStreamId: TEST_STREAM, events: makeEvents(5), expectedVersion: -2, requireMaster: false });
 
   client.writeEventsCompleted$.first().subscribe(() => {
@@ -88,12 +108,10 @@ client.connected$.subscribe(() => {
 });
 
 client.connect();
-setTimeout(() => client.close(), 5000);
-
 
 ```
 
-## CONTRIBUTING
+## Contributing
 
 ### Branch Organization
 
@@ -172,11 +190,11 @@ Metrics recorded meing benchmark.js and microtime for timing.
 | **Reading 100 events from $all stream**                        | **825** | **82,531**  | **±2.44%**  | **73**  |
 | Reading 1000 events from $all stream                           | 54.42   | 54,417      | ±2.35%      | 66      |
 | Reading 4096 (max) events from $all stream                     | 12.26   | 50,205      | ±3.84%      | 60      |
-| Reading 1 events from stream with ten thomeand events          | 2,877   | 2,877       | ±4.80%      | 75      |
-| Reading 10 events from stream with ten thomeand events         | 2,358   | 23,579      | ±1.60%      | 76      |
-| Reading 100 events from stream with ten thomeand events        | 1,024   | 102,357     | ±2.87%      | 79      |
-| **Reading 1000 events from stream with ten thomeand events**   | **143** | **142,717** | **±3.49%**  | **68**  |
-| Reading 4096 (max) events from stream with ten thomeand events | 35.33   | 144,708     | ±2.42%      | 59      |
+| Reading 1 events from stream with ten thousand events          | 2,877   | 2,877       | ±4.80%      | 75      |
+| Reading 10 events from stream with ten thousand events         | 2,358   | 23,579      | ±1.60%      | 76      |
+| Reading 100 events from stream with ten thousand events        | 1,024   | 102,357     | ±2.87%      | 79      |
+| **Reading 1000 events from stream with ten thousand events**   | **143** | **142,717** | **±3.49%**  | **68**  |
+| Reading 4096 (max) events from stream with ten thousand events | 35.33   | 144,708     | ±2.42%      | 59      |
 
 ### License
 
