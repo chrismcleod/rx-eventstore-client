@@ -20,10 +20,20 @@ const makeEvents = (count: number) => {
 
 const TEST_STREAM = 'rxeventstoreclienttests-tests-eb61d1f9-a0cc-4e96-ba35-d0160339898c';
 const TEST_SUBSCRIPTION = `rxeventstoreclienttests-tests-${v4()}`;
-const client = new Client({ host: '192.168.99.100', port: 1113, credentials: { username: 'admin', password: 'changeit' } });
+const client = new Client({
+  host: '192.168.99.100',
+  port: 1113,
+  credentials: { username: 'admin', password: 'changeit' },
+  reconnection: {
+    retries: 5,
+    strategy: 'log', // logarithmic backoff interval between reconnection attempts up to a max of 30 seconds
+    interval: 1000
+  }
+});
 
 client.connected$.subscribe(() => {
-
+  console.log('connected');
+  client.notHandled$.subscribe(() => console.log('not handled'))
   client.writeEvents({ eventStreamId: TEST_STREAM, events: makeEvents(5), expectedVersion: -2, requireMaster: false });
 
   client.writeEventsCompleted$.first().subscribe(() => {
@@ -58,4 +68,3 @@ client.connected$.subscribe(() => {
 });
 
 client.connect();
-setTimeout(() => client.close(), 5000);
