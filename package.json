@@ -1,6 +1,7 @@
 {
   "name": "rx-eventstore-client",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "repository": "https://github.com/chrismcleod/rx-eventstore-client",
   "scripts": {
     "clear": "rm -rf ./lib",
     "build": "tsc -p ./tsconfig.json | true",
