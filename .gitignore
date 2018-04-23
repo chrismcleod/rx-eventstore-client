@@ -1,0 +1,9 @@
+.DS_Store
+env.dev.ts
+env.prd.ts
+env.dev.js
+env.prd.js
+lib
+dist
+/node_modules
+yarn-error.log

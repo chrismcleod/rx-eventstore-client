@@ -1,0 +1,25 @@
+{
+  "name": "rx-eventstore-client",
+  "version": "0.0.1",
+  "scripts": {
+    "clear": "rm -rf ./lib",
+    "build": "tsc -p ./tsconfig.json | true",
+    "rebuild": "yarn clear && yarn build",
+    "prepublish": "yarn rebuild"
+  },
+  "dependencies": {
+    "esproto": "^0.1.3",
+    "rx-eventstore-streams": "^0.1.1",
+    "rxjs": "^5.5.7",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/long": "^3.0.32",
+    "@types/node": "^9.4.7",
+    "@types/uuid": "^3.4.3",
+    "tslint": "^5.9.1",
+    "tslint-config-airbnb": "^5.7.0",
+    "tslint-eslint-rules": "^5.1.0",
+    "typescript": "^2.8.0"
+  }
+}
